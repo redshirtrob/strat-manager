@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+import datetime
 import mailbox
+import os
 import quopri
 import tnefparse
+
+UNKNOWN_COUNT=0
 
 def extract_html_from_text_html(part):
     html = part.get_payload(decode=True)
@@ -27,6 +31,25 @@ def extract_html_from_application_ms_tnef(message=None, part=None):
         
     return html
 
+def gen_filename(subject, count):
+    global UNKNOWN_COUNT
+
+    try:
+        _, date = subject.split()
+        m, d, y = map(int, date.split('/'))
+        d = datetime.datetime(y+2000, m, d)
+        base = '{:%Y%m%d}'.format(d)
+    except ValueError as e:
+        base = 'UNKNOWN{}'.format(UNKNOWN_COUNT)
+        UNKNOWN_COUNT += 1
+        
+    if count > 0:
+        filename = '{}{}DAY.htm'.format(base, count)
+    else:
+        filename = '{}DAY.htm'.format(base)
+
+    return filename
+
 def main():
     mbox = mailbox.mbox('BLB-Sirk.mbox')
 
@@ -45,17 +68,28 @@ def main():
             if isinstance(part, str):
                 continue
 
+            filename = html = None
             content_type = part.get_content_type()
             if content_type == 'text/html':
+                filename = part.get_filename()
+                if filename is None:
+                    filename = gen_filename(subject, count)
                 html = extract_html_from_text_html(part)
-                extracted_html = True
+                print "Extracted {} file: {}".format(content_type, filename)
                 count += 1
             elif content_type == 'application/ms-tnef':
+                filename = gen_filename(subject, count)
                 html = extract_html_from_application_ms_tnef(message, part)
-                extracted_html = True
+                print "Extracted {} file: {}".format(content_type, filename)
                 count += 1
             else:
-                print "Skipping: {}".format(content_type)
+                if content_type != 'text/plain' and content_type != 'multipart/alternative':
+                    print "Skipping: {}".format(content_type)
+
+            if html is not None:
+                full_path = os.path.join('data-files', filename)
+                with open(full_path, 'w') as f:
+                    f.write(html)
 
         if count == 0:
             print "ERROR: Couldn't extract data from {}".format(subject)
