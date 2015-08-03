@@ -1,0 +1,15 @@
+*.swp
+
+# OSX
+*.DS_Store
+.DS_Store
+
+# Temporary files
+*~
+\#*\#
+.#*
+
+*.html
+*.mbox
+*.txt
+*.dat
