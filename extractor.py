@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from bs4 import BeautifulSoup
+import base64
 import datetime
 import mailbox
 import os
@@ -18,6 +20,16 @@ def extract_html_from_application_ms_tnef(message=None, part=None):
     cte = part.get('Content-Transfer-Encoding')
     if cte == 'quoted-printable':
         decoded_part = quopri.decodestring(part.get_payload())
+        tnef = tnefparse.TNEF(decoded_part)
+        if len(tnef.attachments) == 0:
+            print "Didn't find any attachments: {}".format(len(tnef.attachments))
+        elif len(tnef.attachments) > 1:
+            print "Found more than one attatchment: {}".format(len(tnef.attachments))
+        else:
+            attachment = tnef.attachments[0]
+            html = attachment.data
+    elif cte == 'base64':
+        decoded_part = base64.b64decode(part.get_payload())
         tnef = tnefparse.TNEF(decoded_part)
         if len(tnef.attachments) == 0:
             print "Didn't find any attachments: {}".format(len(tnef.attachments))
@@ -50,17 +62,25 @@ def gen_filename(subject, count):
 
     return filename
 
+def get_title(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    title = soup.find('title')
+    if title is not None:
+        return title.contents[0]
+    return "UNKNOWN"
+
 def main():
     mbox = mailbox.mbox('BLB-Sirk.mbox')
 
     current_message_index = 0
     for message in mbox:
         subject = message['subject']
+        ident = message['Message-ID']
 
         if subject.lower().startswith('re'):
             continue
         
-        print "Processing: {}".format(subject)
+        print "Processing: {}".format(ident)
 
         count = 0
         parts = message.get_payload()
@@ -87,6 +107,7 @@ def main():
                     print "Skipping: {}".format(content_type)
 
             if html is not None:
+                print "Title: {}".format(get_title(html))
                 full_path = os.path.join('data-files', filename)
                 with open(full_path, 'w') as f:
                     f.write(html)
