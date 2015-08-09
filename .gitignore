@@ -14,5 +14,6 @@
 *.mbox
 *.txt
 *.dat
+*.ast
 
 data-files/*
