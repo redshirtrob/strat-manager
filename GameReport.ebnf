@@ -7,6 +7,7 @@ tr_close = '</tr>' ;
 td = '<td valign="top">' ;
 td_close = '</td>' ;
 p = '<p class="bnorm">' ;
+p_norm = '<p class="norm">' ;
 p_close = '</p>' ;
 table = '<table width="100%%" cellspacing="20" border="0">' ;
 table_close = '</table>' ;
@@ -47,6 +48,27 @@ city =
     'Steel City' |
     'Washington'
     ;
+
+city_caps =
+    'ATLANTA' |
+    'BOSTON' |
+    'CHARLOTTE' |
+    'CHICAGO' |
+    'CINCINNATI' |
+    'CLEVELAND' |
+    'COLUMBUS' |
+    'DETROIT' |
+    'MIAMI' |
+    'MONTREAL' |
+    'NASHVILLE' |
+    'NEW ORLEANS' |
+    'NEW YORK' |
+    'PHILADELPHIA' |
+    'ST. LOUIS' |
+    'STEEL CITY' |
+    'WASHINGTON'
+    ;
+
 
 nickname =
     'Crackers' |
@@ -488,6 +510,7 @@ boxscore_player_statistic_details_name =
     'DOUBLES' |
     'TRIPLES' |
     'HOME RUNS' |
+    'Homeruns' |
     'SACRIFICE HITS' |
     'SACRIFICE FLIES' |
     'RBIs' |
@@ -605,3 +628,82 @@ boxscore_table =
     ;
 
 boxscore_all = @:{boxscore_table} ;
+
+(* Game Stories *)
+
+(* <font color="#FF0000">MIAMI AT ST. LOUIS</font> *)
+game_story_header =
+    >font_red
+    away:city_caps
+    'AT'
+    home:city_caps
+    >font_close
+    ;
+
+game_story_pitcher_decision =
+    type:('Win' | 'Loss')
+    ':'
+    player:last_name
+    record:parenthesized_record
+    ;
+
+game_story_pitcher_save =
+    type:'Save'
+    ':'
+    player:last_name
+    season_count:parenthesized_whole_ordinal
+    ;
+
+(* <font color="#000000">Win:Samardzija(4-1) Loss:Kuroda(2-1) Save:Giles(4th)</font> *)
+game_story_pitcher_stats =
+    >font_white
+    winning_pitcher:game_story_pitcher_decision
+    losing_pitcher:game_story_pitcher_decision
+    [save_pitcher:game_story_pitcher_save]
+    >font_close
+    ;
+
+text_no_close_font = ?/[A-Za-z0-9'\s\(\)\!\.\,\/\-\;]*(?=<\/font>)/? ;
+
+game_story_recap_line =
+    >font_white
+    @:text_no_close_font
+    >font_close
+    ;
+
+game_story_recap =
+    @:{game_story_recap_line}
+    ;
+
+game_story =
+    [boxscore_spacer]
+    matchup:game_story_header
+    away:boxscore_team
+    home:boxscore_team
+    pitcher_stats:game_story_pitcher_stats
+    [hitter_stats:boxscore_statistic_details]
+    boxscore_spacer
+    recap:game_story_recap
+    ;
+
+game_story_data =
+    td
+    pre
+    p_norm
+    @:{game_story}
+    p_close
+    pre_close
+    td_close
+    ;
+
+game_story_row =
+    tr
+    @:{game_story_data}
+    tr_close
+    ;
+
+game_story_table =
+    table
+    @:{game_story_row}
+    table_close
+    ;

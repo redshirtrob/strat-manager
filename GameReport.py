@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 10, 0, 53, 18, 0)
+__version__ = (2015, 8, 14, 5, 55, 55, 4)
 
 __all__ = [
     'GameReportParser',
@@ -64,6 +64,10 @@ class GameReportParser(Parser):
     @graken()
     def _p_(self):
         self._token('<p class="bnorm">')
+
+    @graken()
+    def _p_norm_(self):
+        self._token('<p class="norm">')
 
     @graken()
     def _p_close_(self):
@@ -163,6 +167,45 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('Washington')
             self._error('expecting one of: Atlanta Boston Charlotte Chicago Cincinnati Cleveland Columbus Detroit Miami Montreal Nashville New Orleans New York Philadelphia St. Louis Steel City Washington')
+
+    @graken()
+    def _city_caps_(self):
+        with self._choice():
+            with self._option():
+                self._token('ATLANTA')
+            with self._option():
+                self._token('BOSTON')
+            with self._option():
+                self._token('CHARLOTTE')
+            with self._option():
+                self._token('CHICAGO')
+            with self._option():
+                self._token('CINCINNATI')
+            with self._option():
+                self._token('CLEVELAND')
+            with self._option():
+                self._token('COLUMBUS')
+            with self._option():
+                self._token('DETROIT')
+            with self._option():
+                self._token('MIAMI')
+            with self._option():
+                self._token('MONTREAL')
+            with self._option():
+                self._token('NASHVILLE')
+            with self._option():
+                self._token('NEW ORLEANS')
+            with self._option():
+                self._token('NEW YORK')
+            with self._option():
+                self._token('PHILADELPHIA')
+            with self._option():
+                self._token('ST. LOUIS')
+            with self._option():
+                self._token('STEEL CITY')
+            with self._option():
+                self._token('WASHINGTON')
+            self._error('expecting one of: ATLANTA BOSTON CHARLOTTE CHICAGO CINCINNATI CLEVELAND COLUMBUS DETROIT MIAMI MONTREAL NASHVILLE NEW ORLEANS NEW YORK PHILADELPHIA ST. LOUIS STEEL CITY WASHINGTON')
 
     @graken()
     def _nickname_(self):
@@ -1201,6 +1244,8 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('HOME RUNS')
             with self._option():
+                self._token('Homeruns')
+            with self._option():
                 self._token('SACRIFICE HITS')
             with self._option():
                 self._token('SACRIFICE FLIES')
@@ -1226,7 +1271,7 @@ class GameReportParser(Parser):
                 self._token('2-out RBI')
             with self._option():
                 self._token('RLISP 2-out')
-            self._error('expecting one of: 2-out RBI BALKS CAUGHT STEALING DOUBLES ERRORS GIDP HIT BY PITCH HOME RUNS RBIs RLISP 2-out SACRIFICE FLIES SACRIFICE HITS STOLEN BASES STRIKE OUTS TRIPLES WALKS WILD PITCHES')
+            self._error('expecting one of: 2-out RBI BALKS CAUGHT STEALING DOUBLES ERRORS GIDP HIT BY PITCH HOME RUNS Homeruns RBIs RLISP 2-out SACRIFICE FLIES SACRIFICE HITS STOLEN BASES STRIKE OUTS TRIPLES WALKS WILD PITCHES')
 
     @graken()
     def _boxscore_statistic_details_(self):
@@ -1440,6 +1485,154 @@ class GameReportParser(Parser):
         self._closure(block1)
         self.ast['@'] = self.last_node
 
+    @graken()
+    def _game_story_header_(self):
+        self._token('<font color="#FF0000">')
+
+        self._city_caps_()
+        self.ast['away'] = self.last_node
+        self._token('AT')
+        self._city_caps_()
+        self.ast['home'] = self.last_node
+        self._token('</font>')
+
+        self.ast._define(
+            ['away', 'home'],
+            []
+        )
+
+    @graken()
+    def _game_story_pitcher_decision_(self):
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._token('Win')
+                with self._option():
+                    self._token('Loss')
+                self._error('expecting one of: Loss Win')
+        self.ast['type'] = self.last_node
+        self._token(':')
+        self._last_name_()
+        self.ast['player'] = self.last_node
+        self._parenthesized_record_()
+        self.ast['record'] = self.last_node
+
+        self.ast._define(
+            ['type', 'player', 'record'],
+            []
+        )
+
+    @graken()
+    def _game_story_pitcher_save_(self):
+        self._token('Save')
+        self.ast['type'] = self.last_node
+        self._token(':')
+        self._last_name_()
+        self.ast['player'] = self.last_node
+        self._parenthesized_whole_ordinal_()
+        self.ast['season_count'] = self.last_node
+
+        self.ast._define(
+            ['type', 'player', 'season_count'],
+            []
+        )
+
+    @graken()
+    def _game_story_pitcher_stats_(self):
+        self._token('<font color="#000000">')
+
+        self._game_story_pitcher_decision_()
+        self.ast['winning_pitcher'] = self.last_node
+        self._game_story_pitcher_decision_()
+        self.ast['losing_pitcher'] = self.last_node
+        with self._optional():
+            self._game_story_pitcher_save_()
+            self.ast['save_pitcher'] = self.last_node
+        self._token('</font>')
+
+        self.ast._define(
+            ['winning_pitcher', 'losing_pitcher', 'save_pitcher'],
+            []
+        )
+
+    @graken()
+    def _text_no_close_font_(self):
+        self._pattern(r"[A-Za-z0-9'\s\(\)\!\.\,\/\-\;]*(?=<\/font>)")
+
+    @graken()
+    def _game_story_recap_line_(self):
+        self._token('<font color="#000000">')
+
+        self._text_no_close_font_()
+        self.ast['@'] = self.last_node
+        self._token('</font>')
+
+    @graken()
+    def _game_story_recap_(self):
+
+        def block1():
+            self._game_story_recap_line_()
+        self._closure(block1)
+        self.ast['@'] = self.last_node
+
+    @graken()
+    def _game_story_(self):
+        with self._optional():
+            self._boxscore_spacer_()
+        self._game_story_header_()
+        self.ast['matchup'] = self.last_node
+        self._boxscore_team_()
+        self.ast['away'] = self.last_node
+        self._boxscore_team_()
+        self.ast['home'] = self.last_node
+        self._game_story_pitcher_stats_()
+        self.ast['pitcher_stats'] = self.last_node
+        with self._optional():
+            self._boxscore_statistic_details_()
+            self.ast['hitter_stats'] = self.last_node
+        self._boxscore_spacer_()
+        self._game_story_recap_()
+        self.ast['recap'] = self.last_node
+
+        self.ast._define(
+            ['matchup', 'away', 'home', 'pitcher_stats', 'hitter_stats', 'recap'],
+            []
+        )
+
+    @graken()
+    def _game_story_data_(self):
+        self._td_()
+        self._pre_()
+        self._p_norm_()
+
+        def block1():
+            self._game_story_()
+        self._closure(block1)
+        self.ast['@'] = self.last_node
+        self._p_close_()
+        self._pre_close_()
+        self._td_close_()
+
+    @graken()
+    def _game_story_row_(self):
+        self._tr_()
+
+        def block1():
+            self._game_story_data_()
+        self._closure(block1)
+        self.ast['@'] = self.last_node
+        self._tr_close_()
+
+    @graken()
+    def _game_story_table_(self):
+        self._table_()
+
+        def block1():
+            self._game_story_row_()
+        self._closure(block1)
+        self.ast['@'] = self.last_node
+        self._table_close_()
+
 
 class GameReportSemantics(object):
     def pre(self, ast):
@@ -1461,6 +1654,9 @@ class GameReportSemantics(object):
         return ast
 
     def p(self, ast):
+        return ast
+
+    def p_norm(self, ast):
         return ast
 
     def p_close(self, ast):
@@ -1509,6 +1705,9 @@ class GameReportSemantics(object):
         return ast
 
     def city(self, ast):
+        return ast
+
+    def city_caps(self, ast):
         return ast
 
     def nickname(self, ast):
@@ -1791,6 +1990,39 @@ class GameReportSemantics(object):
         return ast
 
     def boxscore_all(self, ast):
+        return ast
+
+    def game_story_header(self, ast):
+        return ast
+
+    def game_story_pitcher_decision(self, ast):
+        return ast
+
+    def game_story_pitcher_save(self, ast):
+        return ast
+
+    def game_story_pitcher_stats(self, ast):
+        return ast
+
+    def text_no_close_font(self, ast):
+        return ast
+
+    def game_story_recap_line(self, ast):
+        return ast
+
+    def game_story_recap(self, ast):
+        return ast
+
+    def game_story(self, ast):
+        return ast
+
+    def game_story_data(self, ast):
+        return ast
+
+    def game_story_row(self, ast):
+        return ast
+
+    def game_story_table(self, ast):
         return ast
 
 
