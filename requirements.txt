@@ -1,2 +1,0 @@
-beautifulsoup4==4.4.0
-tnefparse==1.2

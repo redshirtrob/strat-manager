@@ -45,6 +45,7 @@ def main():
             continue
         
         print "Processing: {}".format(message_id)
+        print "\tSubject: {}".format(subject)
 
         count = 0
         parts = message.get_payload()
@@ -65,8 +66,8 @@ def main():
                     print "Skipping: {}".format(content_type)
 
             for attachment in attachments:
-                print "Title: {}".format(get_title(attachment))
                 filename = '{}.dat'.format(attachment_count)
+                print "\tTitle: {} ({})".format(get_title(attachment), filename)
                 full_path = os.path.join('data-files', filename)
                 with open(full_path, 'w') as f:
                     f.write(attachment)
@@ -74,9 +75,9 @@ def main():
             total_attachment_count += len(attachments)
                 
         if count == 0:
-            print "ERROR: Couldn't extract data from {}".format(subject)
+            print "\tERROR: Couldn't extract data from {}".format(subject)
         else:
-            print "Extracted {} data file(s) from {}".format(count, subject)
+            print "\tExtracted {} data file(s) from {}".format(count, subject)
         current_message_index += 1
     print "Extracted {} attachments from data set".format(total_attachment_count)
             

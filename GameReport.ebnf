@@ -181,6 +181,7 @@ boxscore_header =
     ;
     
 boxscore_matchup =
+    ['BOXSCORE:']
     away:annual_team
     'At'
     home:annual_team
@@ -706,4 +707,9 @@ game_story_table =
     table
     @:{game_story_row}
     table_close
+    ;
+
+full_recap =
+    boxscore
+    game_story_recap
     ;

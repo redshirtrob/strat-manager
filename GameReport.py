@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 14, 5, 55, 55, 4)
+__version__ = (2015, 8, 15, 4, 8, 18, 5)
 
 __all__ = [
     'GameReportParser',
@@ -506,6 +506,8 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_matchup_(self):
+        with self._optional():
+            self._token('BOXSCORE:')
         self._annual_team_()
         self.ast['away'] = self.last_node
         self._token('At')
@@ -1633,6 +1635,11 @@ class GameReportParser(Parser):
         self.ast['@'] = self.last_node
         self._table_close_()
 
+    @graken()
+    def _full_recap_(self):
+        self._boxscore_()
+        self._game_story_recap_()
+
 
 class GameReportSemantics(object):
     def pre(self, ast):
@@ -2023,6 +2030,9 @@ class GameReportSemantics(object):
         return ast
 
     def game_story_table(self, ast):
+        return ast
+
+    def full_recap(self, ast):
         return ast
 
 
