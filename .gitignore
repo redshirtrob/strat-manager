@@ -16,5 +16,6 @@
 *.dat
 *.ast
 *.pyc
+*.json
 
 data-files/*

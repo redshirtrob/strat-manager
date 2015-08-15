@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 15, 4, 32, 15, 5)
+__version__ = (2015, 8, 15, 5, 6, 34, 5)
 
 __all__ = [
     'GameReportParser',
@@ -75,7 +75,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _table_(self):
-        self._token('<table width="100%%" cellspacing="20" border="0">')
+        self._pattern(r'<table.*>')
 
     @graken()
     def _table_close_(self):
@@ -1474,7 +1474,6 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_table_(self):
-        self._page_break_()
         self._table_()
 
         def block1():
@@ -1485,6 +1484,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_all_(self):
+        self._page_break_()
 
         def block1():
             self._boxscore_table_()

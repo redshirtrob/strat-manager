@@ -9,7 +9,7 @@ td_close = '</td>' ;
 p = '<p class="bnorm">' ;
 p_norm = '<p class="norm">' ;
 p_close = '</p>' ;
-table = '<table width="100%%" cellspacing="20" border="0">' ;
+table = ?/<table.*>/? ;
 table_close = '</table>' ;
 
 font_size_2 = '<font size="2">' ;
@@ -623,13 +623,14 @@ boxscore_row =
 page_break = "<p style='page-break-before:always' ></p>" ;
 
 boxscore_table =
-    page_break
     table
     @:{boxscore_row}
     table_close
     ;
 
-boxscore_all = @:{boxscore_table} ;
+boxscore_all =
+    page_break
+    @:{boxscore_table} ;
 
 (* Game Stories *)
 
