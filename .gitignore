@@ -15,5 +15,6 @@
 *.txt
 *.dat
 *.ast
+*.pyc
 
 data-files/*

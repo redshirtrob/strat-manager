@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 15, 4, 8, 18, 5)
+__version__ = (2015, 8, 15, 4, 32, 15, 5)
 
 __all__ = [
     'GameReportParser',
@@ -80,6 +80,10 @@ class GameReportParser(Parser):
     @graken()
     def _table_close_(self):
         self._token('</table>')
+
+    @graken()
+    def _font_size_2_(self):
+        self._token('<font size="2">')
 
     @graken()
     def _font_white_(self):
@@ -1637,8 +1641,19 @@ class GameReportParser(Parser):
 
     @graken()
     def _full_recap_(self):
+        self._pre_()
+        self._font_size_2_()
         self._boxscore_()
+        self.ast['boxscore'] = self.last_node
         self._game_story_recap_()
+        self.ast['game_story'] = self.last_node
+        self._font_close_()
+        self._pre_close_()
+
+        self.ast._define(
+            ['boxscore', 'game_story'],
+            []
+        )
 
 
 class GameReportSemantics(object):
@@ -1673,6 +1688,9 @@ class GameReportSemantics(object):
         return ast
 
     def table_close(self, ast):
+        return ast
+
+    def font_size_2(self, ast):
         return ast
 
     def font_white(self, ast):
