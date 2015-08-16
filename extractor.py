@@ -7,6 +7,10 @@ import os
 import quopri
 import tnefparse
 
+from bs4 import BeautifulSoup
+
+from pymongo import MongoClient
+
 def extract_html_from_text_html(part):
     return [part.get_payload(decode=True)]
 
@@ -32,6 +36,12 @@ def get_title(html):
 def main():
     mbox = mailbox.mbox('BLB-Sirk.mbox')
 
+    client = MongoClient('mongodb://localhost:27017')
+    db = client.get_database('extractor')
+    client.drop_database(db)
+
+    collection = db.attachments
+
     total_attachment_count = 0
     attachment_count = 0
     current_message_index = 0
@@ -39,8 +49,8 @@ def main():
         subject = message['subject']
         message_id = message['Message-ID']
 
-        # Skip replies
-        if subject.lower().startswith('re:'):
+        # Skip replies and forwards
+        if subject.lower().startswith('re:') or subject.lower.startswith('fw:'):
             continue
         
         print "Processing: {}".format(message_id)
@@ -70,6 +80,11 @@ def main():
                 full_path = os.path.join('data-files', filename)
                 with open(full_path, 'w') as f:
                     f.write(attachment)
+                document = {'message_id' : message_id,
+                            'subject' : subject,
+                            'content' : attachment,
+                            'filename' : filename}
+                collection.insert_one(document)
                 attachment_count += 1
             total_attachment_count += len(attachments)
                 
@@ -79,6 +94,7 @@ def main():
             print "\tExtracted {} data file(s) from {}".format(count, subject)
         current_message_index += 1
     print "Extracted {} attachments from data set".format(total_attachment_count)
+    client.close()
             
 if __name__ == '__main__':
     main()

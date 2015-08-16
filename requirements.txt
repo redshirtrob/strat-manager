@@ -1,0 +1,6 @@
+beautifulsoup4==4.4.0
+gnureadline==6.3.3
+grako==3.6.3
+ipython==3.2.1
+pymongo==3.0.3
+tnefparse==1.2
