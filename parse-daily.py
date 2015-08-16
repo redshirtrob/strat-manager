@@ -26,7 +26,7 @@ def main(filename):
 if __name__ == '__main__':
     import argparse
 
-    parser= argparse.ArgumentParser(description="Daily parser for Strat-O-Matic Report files")
+    parser = argparse.ArgumentParser(description="Daily parser for Strat-O-Matic Report files")
     parser.add_argument('file', metavar="FILE", help="the input file to parse")
     args = parser.parse_args()
     
