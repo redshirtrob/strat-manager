@@ -19,17 +19,17 @@ font_red = '<font color="#FF0000">' ;
 font_close = '</font>' ;
 
 (* J.Bradley Jr *)
-short_name = ?/[A-Z]\.[A-Za-z\'\s]+/? ;
-short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))/? ;
-short_name_no_result = ?/[A-Z]\.[A-Za-z\s\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|[0-9]))/? ;
+short_name = ?/[A-Z]\.[A-Za-z\*\-\'\s]+/? ;
+short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))/? ;
+short_name_no_result = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|B|[0-9]))/? ;
 
-last_name = ?/[A-Za-z\'\s]+/? ;
-last_name_no_in = ?/[A-Za-z\'\s]+(?= In)/? ;
+last_name = ?/[A-Za-z\-\'\s\*]+/? ;
+last_name_no_in = ?/[A-Za-z\-\'\s\*]+(?= In)/? ;
 
-full_name = ?/[A-Za-z\.\'\s]+/? ;
-full_name_no_injured = ?/[A-Za-z\.\s\']+(?= INJURED)/? ;
-full_name_no_gem_event = ?/[A-Za-z\.\s\']+(?= (robbed|blocked|turns))/? ;
-full_name_no_of = ?/[A-Za-z\.\s\']+(?= of)/? ;
+full_name = ?/[A-Za-z\.\-\'\s]+/? ;
+full_name_no_injured = ?/[A-Za-z\.\s\-\']+(?= INJURED)/? ;
+full_name_no_gem_event = ?/[A-Za-z\.\s\-\']+(?= (robbed|blocked|turns))/? ;
+full_name_no_of = ?/[A-Za-z\.\s\-\']+(?= of)/? ;
 
 city =
     'Atlanta' |
@@ -99,6 +99,7 @@ year = ?/[0-9]{4}/? ;
 mdy = ?/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}/? ;
 dash = '-' ;
 decimal_number = ?/[0-9]?\.?[0-9]+/? ;
+not_a_number = '----' ;
 partial_inning_number = ?/[12]{1}\/3/? ;
 whole_number = ?/[0-9]+/? ;
 whole_number_comma = ?/[0-9,]+/? ;
@@ -162,7 +163,7 @@ half_inning =
    number:whole_ordinal
    ;
 
-parenthesized_whole_ordinal = '(' @:whole_ordinal ')' ;
+parenthesized_whole_ordinal = '(' @:whole_ordinal [')'] ;
 
 annual_team =
     year:year
@@ -229,7 +230,7 @@ boxscore_hitting_stat_line =
     substitution:[boxscore_hitting_substitution]
     player_name:short_name_no_pos
     positions:{boxscore_hitting_position}
-    statistics:{decimal_number}
+    statistics:{(decimal_number | not_a_number)}
     ;
 
 (* <font color="#000000">C-R.Tejada PR,SS      0  0  0  0 .000   D-J.Bradley Jr PR,DH  0  0  0  0 .238  </font> *)
@@ -377,7 +378,7 @@ record =
     '-'
     losses:whole_number
     ;
-parenthesized_record = '(' @:record ')' ;
+parenthesized_record = '(' @:record [')'] ;
 
 (* <font color="#FF0000">Spiders (40-58)          IP       H   R  ER  BB  SO  HR  PC    ERA  SCORESHEET</font> *)
 boxscore_pitching_header_team =
@@ -397,6 +398,7 @@ boxscore_pitching_result_hold_abv = @:'H' parenthesized_whole_ordinal ;
 boxscore_pitching_result_save = @:'SAVE' parenthesized_whole_ordinal ;
 boxscore_pitching_result_save_abv = @:'S' parenthesized_whole_ordinal ;
 boxscore_pitching_result_blown_save = @:'BS' parenthesized_whole_ordinal ;
+boxscore_pitching_result_blown_save_abv = @:'B' parenthesized_whole_ordinal ;
 
 boxscore_pitching_result_stat =
     boxscore_pitching_result_win |
@@ -407,7 +409,8 @@ boxscore_pitching_result_stat =
     boxscore_pitching_result_hold_abv |
     boxscore_pitching_result_save |
     boxscore_pitching_result_save_abv |
-    boxscore_pitching_result_blown_save
+    boxscore_pitching_result_blown_save |
+    boxscore_pitching_result_blown_save_abv
     ;
 
 (* <font color="#000000">J.Lopez WIN(4-0) BS(1st)  1 1/3   1   0   0   1   0   0  24   2.96</font> *)
@@ -416,7 +419,7 @@ boxscore_pitching_stat_line =
     player_name:short_name_no_result
     result_stats:{boxscore_pitching_result_stat}
     ip:innings_pitched_number
-    statistics:{decimal_number}
+    statistics:{(decimal_number | not_a_number)}
     [scoresheet:{scoresheet_index}]
     >font_close
     ;
@@ -529,6 +532,8 @@ boxscore_player_statistic_details_name =
     'HIT BY PITCH' |
     'STRIKE OUTS' |
     'GIDP' |
+    'CATCHERS INTERFERENCE' |
+    'PASSED BALLS' |
     'BALKS' |
     'WILD PITCHES' |
     '2-out RBI' |
@@ -557,7 +562,7 @@ boxscore_risp_details =
     >font_close
     ;
 
-gem_event = ?/[a-z\s]+/? ;
+gem_event = ?/[A-Za-z\s]+/? ;
 
 gem_details =
     gemmer:full_name_no_gem_event
@@ -673,7 +678,7 @@ game_story_pitcher_stats =
     >font_close
     ;
 
-text_no_close_font = ?/[A-Za-z0-9'\s\(\)\!\.\,\/\-\;]*(?=<\/font>)/? ;
+text_no_close_font = ?/[A-Za-z0-9'\s\(\)\!\?\.\,\/\-\;\*]*(?=<\/font>)/? ;
 
 game_story_recap_line =
     >font_white

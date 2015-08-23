@@ -5,22 +5,34 @@ import json
 from bs4 import BeautifulSoup
 from GameReport import GameReportParser
 from pymongo import MongoClient
+from grako.exceptions import FailedToken
 
 def parse_league_daily(content):
     soup = BeautifulSoup(content, 'html.parser')
     tables = soup.find_all('table')
 
-    stories_index = len(tables)-3
-    stories = tables[stories_index]
-    stories_string = stories.prettify()
-
-    boxscores_index = len(tables)-2
-    boxscores = tables[boxscores_index]
-    boxscores_string = boxscores.prettify()
-
     parser = GameReportParser(parseinfo=False)
-    stories_ast = parser.parse(stories_string, 'game_story_table')
-    boxscores_ast = parser.parse(boxscores_string, 'boxscore_table')
+
+    print '    -> Processing stories'
+    stories_ast = None
+    for table in tables:
+        try:
+            stories_ast = parser.parse(table.prettify(), 'game_story_table')
+            break
+        except FailedToken:
+            pass
+
+    print '    -> Processing boxscores'
+    boxscores_ast = None
+    for table in tables:
+        try:
+            boxscores_ast = parser.parse(table.prettify(), 'boxscore_table')
+            break
+        except FailedToken:
+            pass
+
+    if stories_ast is None or boxscores_ast is None:
+        raise Exception
 
     return {'stories' : stories_ast, 'boxscores' : boxscores_ast}
 
@@ -30,6 +42,7 @@ def parse_game_daily(content):
     full_recap_string = full_recap.prettify()
 
     parser = GameReportParser(parseinfo=False)
+    print '    -> Processing combined'
     ast = parser.parse(full_recap_string, 'full_recap')
     return ast
 
@@ -40,13 +53,24 @@ def main():
 
     for attachment in collection.find():
         print 'Processing {}'.format(attachment['filename'])
+        if attachment.has_key('ast'):
+            print '    -> Already Processed'
+            continue
+        
         ast = None
         if attachment['type'] == 'League Daily':
             ast = parse_league_daily(attachment['content'])
         elif attachment['type'] == 'Game Daily':
             ast = parse_game_daily(attachment['content'])
         else:
-            print 'Skipping {}'.format(attachment['message_id'])
+            print '    -> Skipping {} ({})'.format(
+                attachment['type'],
+                attachment['message_id']
+            )
+
+        if ast is not None:
+            attachment['ast'] = ast
+            collection.save(attachment)
 
 if __name__ == '__main__':
     main()

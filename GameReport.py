@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 23, 1, 51, 3, 6)
+__version__ = (2015, 8, 23, 7, 0, 59, 6)
 
 __all__ = [
     'GameReportParser',
@@ -99,39 +99,39 @@ class GameReportParser(Parser):
 
     @graken()
     def _short_name_(self):
-        self._pattern(r"[A-Z]\.[A-Za-z\'\s]+")
+        self._pattern(r"[A-Z]\.[A-Za-z\*\-\'\s]+")
 
     @graken()
     def _short_name_no_pos_(self):
-        self._pattern(r"[A-Z]\.[A-Za-z\s\*\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))")
+        self._pattern(r"[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))")
 
     @graken()
     def _short_name_no_result_(self):
-        self._pattern(r"[A-Z]\.[A-Za-z\s\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|[0-9]))")
+        self._pattern(r"[A-Z]\.[A-Za-z\s\*\-\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|B|[0-9]))")
 
     @graken()
     def _last_name_(self):
-        self._pattern(r"[A-Za-z\'\s]+")
+        self._pattern(r"[A-Za-z\-\'\s\*]+")
 
     @graken()
     def _last_name_no_in_(self):
-        self._pattern(r"[A-Za-z\'\s]+(?= In)")
+        self._pattern(r"[A-Za-z\-\'\s\*]+(?= In)")
 
     @graken()
     def _full_name_(self):
-        self._pattern(r"[A-Za-z\.\'\s]+")
+        self._pattern(r"[A-Za-z\.\-\'\s]+")
 
     @graken()
     def _full_name_no_injured_(self):
-        self._pattern(r"[A-Za-z\.\s\']+(?= INJURED)")
+        self._pattern(r"[A-Za-z\.\s\-\']+(?= INJURED)")
 
     @graken()
     def _full_name_no_gem_event_(self):
-        self._pattern(r"[A-Za-z\.\s\']+(?= (robbed|blocked|turns))")
+        self._pattern(r"[A-Za-z\.\s\-\']+(?= (robbed|blocked|turns))")
 
     @graken()
     def _full_name_no_of_(self):
-        self._pattern(r"[A-Za-z\.\s\']+(?= of)")
+        self._pattern(r"[A-Za-z\.\s\-\']+(?= of)")
 
     @graken()
     def _city_(self):
@@ -303,6 +303,10 @@ class GameReportParser(Parser):
         self._pattern(r'[0-9]?\.?[0-9]+')
 
     @graken()
+    def _not_a_number_(self):
+        self._token('----')
+
+    @graken()
     def _partial_inning_number_(self):
         self._pattern(r'[12]{1}\/3')
 
@@ -472,7 +476,8 @@ class GameReportParser(Parser):
         self._token('(')
         self._whole_ordinal_()
         self.ast['@'] = self.last_node
-        self._token(')')
+        with self._optional():
+            self._token(')')
 
     @graken()
     def _annual_team_(self):
@@ -609,7 +614,13 @@ class GameReportParser(Parser):
         self.ast['positions'] = self.last_node
 
         def block5():
-            self._decimal_number_()
+            with self._group():
+                with self._choice():
+                    with self._option():
+                        self._decimal_number_()
+                    with self._option():
+                        self._not_a_number_()
+                    self._error('no available options')
         self._closure(block5)
         self.ast['statistics'] = self.last_node
 
@@ -920,7 +931,8 @@ class GameReportParser(Parser):
         self._token('(')
         self._record_()
         self.ast['@'] = self.last_node
-        self._token(')')
+        with self._optional():
+            self._token(')')
 
     @graken()
     def _boxscore_pitching_header_team_(self):
@@ -997,6 +1009,12 @@ class GameReportParser(Parser):
         self._parenthesized_whole_ordinal_()
 
     @graken()
+    def _boxscore_pitching_result_blown_save_abv_(self):
+        self._token('B')
+        self.ast['@'] = self.last_node
+        self._parenthesized_whole_ordinal_()
+
+    @graken()
     def _boxscore_pitching_result_stat_(self):
         with self._choice():
             with self._option():
@@ -1017,6 +1035,8 @@ class GameReportParser(Parser):
                 self._boxscore_pitching_result_save_abv_()
             with self._option():
                 self._boxscore_pitching_result_blown_save_()
+            with self._option():
+                self._boxscore_pitching_result_blown_save_abv_()
             self._error('no available options')
 
     @graken()
@@ -1034,14 +1054,20 @@ class GameReportParser(Parser):
         self.ast['ip'] = self.last_node
 
         def block5():
-            self._decimal_number_()
+            with self._group():
+                with self._choice():
+                    with self._option():
+                        self._decimal_number_()
+                    with self._option():
+                        self._not_a_number_()
+                    self._error('no available options')
         self._closure(block5)
         self.ast['statistics'] = self.last_node
         with self._optional():
 
-            def block7():
+            def block8():
                 self._scoresheet_index_()
-            self._closure(block7)
+            self._closure(block8)
             self.ast['scoresheet'] = self.last_node
         self._token('</font>')
 
@@ -1294,6 +1320,10 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('GIDP')
             with self._option():
+                self._token('CATCHERS INTERFERENCE')
+            with self._option():
+                self._token('PASSED BALLS')
+            with self._option():
                 self._token('BALKS')
             with self._option():
                 self._token('WILD PITCHES')
@@ -1301,7 +1331,7 @@ class GameReportParser(Parser):
                 self._token('2-out RBI')
             with self._option():
                 self._token('RLISP 2-out')
-            self._error('expecting one of: 2-out RBI BALKS CAUGHT STEALING DOUBLES ERRORS GIDP HIT BY PITCH HOME RUNS Homeruns RBIs RLISP 2-out SACRIFICE FLIES SACRIFICE HITS STOLEN BASES STRIKE OUTS TRIPLES WALKS WILD PITCHES')
+            self._error('expecting one of: 2-out RBI BALKS CATCHERS INTERFERENCE CAUGHT STEALING DOUBLES ERRORS GIDP HIT BY PITCH HOME RUNS Homeruns PASSED BALLS RBIs RLISP 2-out SACRIFICE FLIES SACRIFICE HITS STOLEN BASES STRIKE OUTS TRIPLES WALKS WILD PITCHES')
 
     @graken()
     def _boxscore_statistic_details_(self):
@@ -1342,7 +1372,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _gem_event_(self):
-        self._pattern(r'[a-z\s]+')
+        self._pattern(r'[A-Za-z\s]+')
 
     @graken()
     def _gem_details_(self):
@@ -1587,7 +1617,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _text_no_close_font_(self):
-        self._pattern(r"[A-Za-z0-9'\s\(\)\!\.\,\/\-\;]*(?=<\/font>)")
+        self._pattern(r"[A-Za-z0-9'\s\(\)\!\?\.\,\/\-\;\*]*(?=<\/font>)")
 
     @graken()
     def _game_story_recap_line_(self):
@@ -1780,6 +1810,9 @@ class GameReportSemantics(object):
     def decimal_number(self, ast):
         return ast
 
+    def not_a_number(self, ast):
+        return ast
+
     def partial_inning_number(self, ast):
         return ast
 
@@ -1952,6 +1985,9 @@ class GameReportSemantics(object):
         return ast
 
     def boxscore_pitching_result_blown_save(self, ast):
+        return ast
+
+    def boxscore_pitching_result_blown_save_abv(self, ast):
         return ast
 
     def boxscore_pitching_result_stat(self, ast):
