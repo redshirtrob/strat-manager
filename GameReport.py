@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 23, 7, 0, 59, 6)
+__version__ = (2015, 8, 23, 14, 58, 56, 6)
 
 __all__ = [
     'GameReportParser',
@@ -80,6 +80,10 @@ class GameReportParser(Parser):
     @graken()
     def _table_close_(self):
         self._token('</table>')
+
+    @graken()
+    def _anything_but_font_close_(self):
+        self._pattern(r'.*(?=<\/font>)')
 
     @graken()
     def _font_size_2_(self):
@@ -167,10 +171,12 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('St. Louis')
             with self._option():
+                self._token('Saint Louis')
+            with self._option():
                 self._token('Steel City')
             with self._option():
                 self._token('Washington')
-            self._error('expecting one of: Atlanta Boston Charlotte Chicago Cincinnati Cleveland Columbus Detroit Miami Montreal Nashville New Orleans New York Philadelphia St. Louis Steel City Washington')
+            self._error('expecting one of: Atlanta Boston Charlotte Chicago Cincinnati Cleveland Columbus Detroit Miami Montreal Nashville New Orleans New York Philadelphia Saint Louis St. Louis Steel City Washington')
 
     @graken()
     def _city_caps_(self):
@@ -206,10 +212,12 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('ST. LOUIS')
             with self._option():
+                self._token('SAINT LOUIS')
+            with self._option():
                 self._token('STEEL CITY')
             with self._option():
                 self._token('WASHINGTON')
-            self._error('expecting one of: ATLANTA BOSTON CHARLOTTE CHICAGO CINCINNATI CLEVELAND COLUMBUS DETROIT MIAMI MONTREAL NASHVILLE NEW ORLEANS NEW YORK PHILADELPHIA ST. LOUIS STEEL CITY WASHINGTON')
+            self._error('expecting one of: ATLANTA BOSTON CHARLOTTE CHICAGO CINCINNATI CLEVELAND COLUMBUS DETROIT MIAMI MONTREAL NASHVILLE NEW ORLEANS NEW YORK PHILADELPHIA SAINT LOUIS ST. LOUIS STEEL CITY WASHINGTON')
 
     @graken()
     def _nickname_(self):
@@ -519,11 +527,18 @@ class GameReportParser(Parser):
             self._token('BOXSCORE:')
         self._annual_team_()
         self.ast['away'] = self.last_node
-        self._token('At')
+        with self._group():
+            with self._choice():
+                with self._option():
+                    self._token('At')
+                with self._option():
+                    self._token('at')
+                self._error('expecting one of: At at')
         self._annual_team_()
         self.ast['home'] = self.last_node
-        self._mdy_()
-        self.ast['date'] = self.last_node
+        with self._optional():
+            self._mdy_()
+            self.ast['date'] = self.last_node
 
         self.ast._define(
             ['away', 'home', 'date'],
@@ -940,8 +955,9 @@ class GameReportParser(Parser):
 
         self._nickname_()
         self.ast['nickname'] = self.last_node
-        self._parenthesized_record_()
-        self.ast['record'] = self.last_node
+        with self._optional():
+            self._parenthesized_record_()
+            self.ast['record'] = self.last_node
 
         def block3():
             self._boxscore_pitching_stat_label_()
@@ -958,7 +974,8 @@ class GameReportParser(Parser):
     def _boxscore_pitching_result_win_(self):
         self._token('WIN')
         self.ast['@'] = self.last_node
-        self._parenthesized_record_()
+        with self._optional():
+            self._parenthesized_record_()
 
     @graken()
     def _boxscore_pitching_result_win_abv_(self):
@@ -970,7 +987,8 @@ class GameReportParser(Parser):
     def _boxscore_pitching_result_loss_(self):
         self._token('LOSS')
         self.ast['@'] = self.last_node
-        self._parenthesized_record_()
+        with self._optional():
+            self._parenthesized_record_()
 
     @graken()
     def _boxscore_pitching_result_loss_abv_(self):
@@ -1018,11 +1036,11 @@ class GameReportParser(Parser):
     def _boxscore_pitching_result_stat_(self):
         with self._choice():
             with self._option():
+                self._boxscore_pitching_result_loss_()
+            with self._option():
                 self._boxscore_pitching_result_win_()
             with self._option():
                 self._boxscore_pitching_result_win_abv_()
-            with self._option():
-                self._boxscore_pitching_result_loss_()
             with self._option():
                 self._boxscore_pitching_result_loss_abv_()
             with self._option():
@@ -1184,8 +1202,9 @@ class GameReportParser(Parser):
 
         self._attendance_data_()
         self.ast['attendance'] = self.last_node
-        self._long_date_data_()
-        self.ast['date'] = self.last_node
+        with self._optional():
+            self._long_date_data_()
+            self.ast['date'] = self.last_node
         self._time_data_()
         self.ast['time'] = self.last_node
         self._weather_data_()
@@ -1694,14 +1713,50 @@ class GameReportParser(Parser):
         self._table_close_()
 
     @graken()
+    def _scoresheet_line_(self):
+        self._token('<font color="#000000">')
+
+        self._anything_but_font_close_()
+        self._token('</font>')
+
+    @graken()
+    def _scoresheet_matchup_header_(self):
+        self._token('<font color="#FF0000">')
+
+        self._token('SCORESHEET:')
+        self._boxscore_matchup_()
+        self._token('</font>')
+
+    @graken()
+    def _scoresheet_(self):
+        self._scoresheet_matchup_header_()
+
+        def block0():
+            self._scoresheet_line_()
+        self._closure(block0)
+        with self._optional():
+            self._token('</font>')
+
+    @graken()
     def _full_recap_(self):
         self._pre_()
         self._font_size_2_()
         self._boxscore_()
         self.ast['boxscore'] = self.last_node
-        self._game_story_recap_()
-        self.ast['game_story'] = self.last_node
-        self._font_close_()
+        with self._optional():
+            self._game_story_recap_()
+            self.ast['game_story'] = self.last_node
+        with self._optional():
+            self._font_close_()
+        with self._optional():
+            self._scoresheet_()
+        with self._optional():
+
+            def block2():
+                self._boxscore_spacer_()
+            self._closure(block2)
+        with self._optional():
+            self._scoresheet_()
         self._pre_close_()
 
         self.ast._define(
@@ -1742,6 +1797,9 @@ class GameReportSemantics(object):
         return ast
 
     def table_close(self, ast):
+        return ast
+
+    def anything_but_font_close(self, ast):
         return ast
 
     def font_size_2(self, ast):
@@ -2117,6 +2175,15 @@ class GameReportSemantics(object):
         return ast
 
     def game_story_table(self, ast):
+        return ast
+
+    def scoresheet_line(self, ast):
+        return ast
+
+    def scoresheet_matchup_header(self, ast):
+        return ast
+
+    def scoresheet(self, ast):
         return ast
 
     def full_recap(self, ast):

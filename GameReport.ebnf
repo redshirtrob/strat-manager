@@ -12,6 +12,7 @@ p_close = '</p>' ;
 table = ?/<table[^>]*>/? ;
 (*table = '<table width="100%%" cellspacing="20" border="0">' ; *)
 table_close = '</table>' ;
+anything_but_font_close = ?/.*(?=<\/font>)/? ;
 
 font_size_2 = '<font size="2">' ;
 font_white = '<font color="#000000">' ;
@@ -47,6 +48,7 @@ city =
     'New York' |
     'Philadelphia' |
     'St. Louis' |
+    'Saint Louis' |
     'Steel City' |
     'Washington'
     ;
@@ -67,6 +69,7 @@ city_caps =
     'NEW YORK' |
     'PHILADELPHIA' |
     'ST. LOUIS' |
+    'SAINT LOUIS' |
     'STEEL CITY' |
     'WASHINGTON'
     ;
@@ -186,9 +189,9 @@ boxscore_header =
 boxscore_matchup =
     ['BOXSCORE:']
     away:annual_team
-    'At'
+    ('At' | 'at')
     home:annual_team
-    date:mdy
+    [date:mdy]
     ;
     
 (* <font color="#FF0000"> 2015 Chicago Northsiders At 2015 Charlotte Monarchs       7/30/2015</font> *)
@@ -384,14 +387,14 @@ parenthesized_record = '(' @:record [')'] ;
 boxscore_pitching_header_team =
     >font_red
     nickname:nickname
-    record:parenthesized_record
+    [record:parenthesized_record]
     headers:{boxscore_pitching_stat_label}
     >font_close
     ;
 
-boxscore_pitching_result_win = @:'WIN' parenthesized_record ;
+boxscore_pitching_result_win = @:'WIN' [parenthesized_record] ;
 boxscore_pitching_result_win_abv = @:'W' parenthesized_record ;
-boxscore_pitching_result_loss = @:'LOSS' parenthesized_record ;
+boxscore_pitching_result_loss = @:'LOSS' [parenthesized_record] ;
 boxscore_pitching_result_loss_abv = @:'L' parenthesized_record ;
 boxscore_pitching_result_hold = @:'HOLD' parenthesized_whole_ordinal ;
 boxscore_pitching_result_hold_abv = @:'H' parenthesized_whole_ordinal ;
@@ -401,9 +404,9 @@ boxscore_pitching_result_blown_save = @:'BS' parenthesized_whole_ordinal ;
 boxscore_pitching_result_blown_save_abv = @:'B' parenthesized_whole_ordinal ;
 
 boxscore_pitching_result_stat =
+    boxscore_pitching_result_loss |
     boxscore_pitching_result_win |
     boxscore_pitching_result_win_abv |
-    boxscore_pitching_result_loss |
     boxscore_pitching_result_loss_abv |
     boxscore_pitching_result_hold |
     boxscore_pitching_result_hold_abv |
@@ -414,6 +417,7 @@ boxscore_pitching_result_stat =
     ;
 
 (* <font color="#000000">J.Lopez WIN(4-0) BS(1st)  1 1/3   1   0   0   1   0   0  24   2.96</font> *)
+(* <font color="#000000">E.Santana WIN             8 1/3   5   3   3   3   6   2 113  A1 D6</font> *)
 boxscore_pitching_stat_line =
     >font_white
     player_name:short_name_no_result
@@ -467,7 +471,7 @@ umpire_data =
 peripheral_game_data =
     >font_white
     attendance:attendance_data
-    date:long_date_data
+    [date:long_date_data]
     time:time_data
     weather:weather_data
     >font_close
@@ -723,11 +727,34 @@ game_story_table =
     table_close
     ;
 
+scoresheet_line =
+    >font_white
+    anything_but_font_close    
+    >font_close
+    ;
+
+scoresheet_matchup_header =
+    >font_red
+    'SCORESHEET:'
+    boxscore_matchup
+    >font_close
+    ;
+
+scoresheet =
+    scoresheet_matchup_header           
+    {scoresheet_line}
+    [>font_close]
+    ;
+
 full_recap =
     pre
     font_size_2
     boxscore:boxscore
-    game_story:game_story_recap
-    font_close
+    [game_story:game_story_recap]
+    [font_close]
+    [scoresheet]
+    [{boxscore_spacer}]
+    [scoresheet]
     pre_close
     ;
+
