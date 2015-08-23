@@ -17,5 +17,6 @@
 *.ast
 *.pyc
 *.json
+*.org
 
 data-files/*

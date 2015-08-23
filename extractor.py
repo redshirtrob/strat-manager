@@ -31,7 +31,31 @@ def get_title(html):
     title = soup.find('title')
     if title is not None:
         return title.contents[0]
-    return "UNKNOWN"
+    return "No Title"
+
+def get_type(html):
+    attachment_type = "Unknown"
+    soup = BeautifulSoup(html, 'html.parser')
+    title = soup.find('title')
+    fonts = soup.find_all('font')
+    if title is not None and title.string == 'Strat-O-Matic Daily Report':
+        attachment_type = 'League Daily'
+    elif fonts is not None:
+        for font in fonts:
+            contents = font.string
+            if contents is None:
+                continue
+            
+            if contents.startswith('BOXSCORE'):
+                attachment_type = 'Game Daily'
+                break
+            elif contents.startswith('*** TOP OF INNING 1 ***'):
+                attachment_type = 'Game Scorebook'
+                break
+            elif contents.startswith('LEAGUE STANDINGS'):
+                attachment_type = 'League Standings'
+                break
+    return attachment_type
 
 def main(mbox_file, stash_directory=None):
     mbox = mailbox.mbox(mbox_file)
@@ -67,28 +91,30 @@ def main(mbox_file, stash_directory=None):
             content_type = part.get_content_type()
             if content_type == 'text/html':
                 attachments = extract_html_from_text_html(part)
-                count += 1
             elif content_type == 'application/ms-tnef':
                 attachments = extract_html_from_application_ms_tnef(message, part)
-                count += 1
             else:
                 if content_type != 'text/plain' and content_type != 'multipart/alternative':
                     print "Skipping: {}".format(content_type)
 
             for attachment in attachments:
-                print "\tTitle: {}".format(get_title(attachment))
+                attachment_type = get_type(attachment)
+                print "\tTitle: {} ({})".format(get_title(attachment), attachment_type)
                 
                 document = {'message_id' : message_id,
                             'subject' : subject,
-                            'content' : attachment}
+                            'content' : attachment,
+                            'type' : attachment_type}
                 if should_stash:
                     filename = '{}.dat'.format(attachment_count)
                     full_path = os.path.join(stash_directory, filename)
                     document['filename'] = full_path
                     with open(full_path, 'w') as f:
                         f.write(attachment)
+                    print "\t\tFile: {}".format(filename)
                 collection.insert_one(document)
                 attachment_count += 1
+                count += 1
             total_attachment_count += len(attachments)
                 
         if count == 0:

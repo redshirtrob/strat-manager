@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 15, 5, 6, 34, 5)
+__version__ = (2015, 8, 23, 1, 51, 3, 6)
 
 __all__ = [
     'GameReportParser',
@@ -75,7 +75,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _table_(self):
-        self._pattern(r'<table.*>')
+        self._pattern(r'<table[^>]*>')
 
     @graken()
     def _table_close_(self):
@@ -107,7 +107,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _short_name_no_result_(self):
-        self._pattern(r"[A-Z]\.[A-Za-z\s\']+(?= (WIN|LOSS|L|HOLD|SAVE|BS|[0-9]))")
+        self._pattern(r"[A-Z]\.[A-Za-z\s\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|[0-9]))")
 
     @graken()
     def _last_name_(self):
@@ -949,6 +949,12 @@ class GameReportParser(Parser):
         self._parenthesized_record_()
 
     @graken()
+    def _boxscore_pitching_result_win_abv_(self):
+        self._token('W')
+        self.ast['@'] = self.last_node
+        self._parenthesized_record_()
+
+    @graken()
     def _boxscore_pitching_result_loss_(self):
         self._token('LOSS')
         self.ast['@'] = self.last_node
@@ -967,8 +973,20 @@ class GameReportParser(Parser):
         self._parenthesized_whole_ordinal_()
 
     @graken()
+    def _boxscore_pitching_result_hold_abv_(self):
+        self._token('H')
+        self.ast['@'] = self.last_node
+        self._parenthesized_whole_ordinal_()
+
+    @graken()
     def _boxscore_pitching_result_save_(self):
         self._token('SAVE')
+        self.ast['@'] = self.last_node
+        self._parenthesized_whole_ordinal_()
+
+    @graken()
+    def _boxscore_pitching_result_save_abv_(self):
+        self._token('S')
         self.ast['@'] = self.last_node
         self._parenthesized_whole_ordinal_()
 
@@ -984,13 +1002,19 @@ class GameReportParser(Parser):
             with self._option():
                 self._boxscore_pitching_result_win_()
             with self._option():
+                self._boxscore_pitching_result_win_abv_()
+            with self._option():
                 self._boxscore_pitching_result_loss_()
             with self._option():
                 self._boxscore_pitching_result_loss_abv_()
             with self._option():
                 self._boxscore_pitching_result_hold_()
             with self._option():
+                self._boxscore_pitching_result_hold_abv_()
+            with self._option():
                 self._boxscore_pitching_result_save_()
+            with self._option():
+                self._boxscore_pitching_result_save_abv_()
             with self._option():
                 self._boxscore_pitching_result_blown_save_()
             self._error('no available options')
@@ -1906,6 +1930,9 @@ class GameReportSemantics(object):
     def boxscore_pitching_result_win(self, ast):
         return ast
 
+    def boxscore_pitching_result_win_abv(self, ast):
+        return ast
+
     def boxscore_pitching_result_loss(self, ast):
         return ast
 
@@ -1915,7 +1942,13 @@ class GameReportSemantics(object):
     def boxscore_pitching_result_hold(self, ast):
         return ast
 
+    def boxscore_pitching_result_hold_abv(self, ast):
+        return ast
+
     def boxscore_pitching_result_save(self, ast):
+        return ast
+
+    def boxscore_pitching_result_save_abv(self, ast):
         return ast
 
     def boxscore_pitching_result_blown_save(self, ast):

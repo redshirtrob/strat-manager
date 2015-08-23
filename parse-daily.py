@@ -11,9 +11,12 @@ def main(filename):
     soup = BeautifulSoup(html, 'html.parser')
     tables = soup.find_all('table')
 
-    stories = tables[1]
+    stories_index = len(tables)-3
+    stories = tables[stories_index]
     stories_string = stories.prettify()
-    boxscores = tables[2]
+
+    boxscores_index = len(tables)-2
+    boxscores = tables[boxscores_index]
     boxscores_string = boxscores.prettify()
 
     parser = GameReportParser(parseinfo=False)
