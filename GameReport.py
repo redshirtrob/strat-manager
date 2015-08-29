@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 23, 14, 58, 56, 6)
+__version__ = (2015, 8, 29, 18, 59, 40, 5)
 
 __all__ = [
     'GameReportParser',
@@ -1741,26 +1741,32 @@ class GameReportParser(Parser):
     def _full_recap_(self):
         self._pre_()
         self._font_size_2_()
-        self._boxscore_()
-        self.ast['boxscore'] = self.last_node
+
+        def block1():
+            self._boxscore_()
+        self._closure(block1)
+        self.ast['boxscores'] = self.last_node
         with self._optional():
-            self._game_story_recap_()
-            self.ast['game_story'] = self.last_node
+
+            def block3():
+                self._game_story_recap_()
+            self._closure(block3)
+            self.ast['game_stories'] = self.last_node
         with self._optional():
             self._font_close_()
         with self._optional():
             self._scoresheet_()
         with self._optional():
 
-            def block2():
+            def block4():
                 self._boxscore_spacer_()
-            self._closure(block2)
+            self._closure(block4)
         with self._optional():
             self._scoresheet_()
         self._pre_close_()
 
         self.ast._define(
-            ['boxscore', 'game_story'],
+            ['boxscores', 'game_stories'],
             []
         )
 

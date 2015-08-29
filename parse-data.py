@@ -34,7 +34,7 @@ def parse_league_daily(content):
     if stories_ast is None or boxscores_ast is None:
         raise Exception
 
-    return {'stories' : stories_ast, 'boxscores' : boxscores_ast}
+    return {'game_stories' : stories_ast, 'boxscores' : boxscores_ast}
 
 def parse_game_daily(content):
     soup = BeautifulSoup(content, 'html.parser')

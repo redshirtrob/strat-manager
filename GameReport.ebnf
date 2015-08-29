@@ -749,8 +749,8 @@ scoresheet =
 full_recap =
     pre
     font_size_2
-    boxscore:boxscore
-    [game_story:game_story_recap]
+    boxscores:{boxscore}
+    [game_stories:{game_story_recap}]
     [font_close]
     [scoresheet]
     [{boxscore_spacer}]
