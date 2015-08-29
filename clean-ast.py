@@ -10,7 +10,7 @@ INT_KEYS = ('part', 'game_count', 'season_count', )
 
 def clean(item, key):
     if item is None and key in INT_KEYS:
-        item = 1
+        item = '1'
     return item
 
 def flatten(item, key=None):

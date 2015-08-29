@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 29, 18, 59, 40, 5)
+__version__ = (2015, 8, 29, 22, 15, 33, 5)
 
 __all__ = [
     'GameReportParser',
@@ -316,7 +316,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _partial_inning_number_(self):
-        self._pattern(r'[12]{1}\/3')
+        self._pattern(r'([12]{1}\/3){0,1}')
 
     @graken()
     def _whole_number_(self):
