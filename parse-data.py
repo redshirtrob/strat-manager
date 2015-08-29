@@ -46,7 +46,7 @@ def parse_game_daily(content):
     ast = parser.parse(full_recap_string, 'full_recap')
     return ast
 
-def main():
+def main(reprocess=False):
     client = MongoClient('mongodb://localhost:27017')
     db = client.get_database('extractor')
     collection = db.attachments
@@ -54,8 +54,11 @@ def main():
     for attachment in collection.find():
         print 'Processing {}'.format(attachment['filename'])
         if attachment.has_key('ast'):
-            print '    -> Already Processed'
-            continue
+            if reprocess == False:
+                print '    -> Already Processed'
+                continue
+            else:
+                print '    -> Reprocessing'
         
         ast = None
         if attachment['type'] == 'League Daily':
@@ -73,4 +76,10 @@ def main():
             collection.save(attachment)
 
 if __name__ == '__main__':
-    main()
+    import argparse
+
+    parser= argparse.ArgumentParser(description="Batch parser for Strat-O-Matic Report files")
+    parser.add_argument('-r', '--reprocess', help="Reprocess all attachment data", action="store_true")
+    args = parser.parse_args()
+    
+    main(args.reprocess)
