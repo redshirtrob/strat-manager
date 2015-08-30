@@ -8,27 +8,36 @@ from pymongo import MongoClient
 
 INT_KEYS = ('part', 'game_count', 'season_count', )
 
-def clean(item, key):
+def clean(item, key, keypath):
     if item is None and key in INT_KEYS:
         item = '1'
+    elif isinstance(item, str) or isinstance(item, unicode):
+        item = item.strip()
+        if (key == 'name' or key == 'player_name') and item.endswith('-'):
+            item = item.rstrip('-')
+            
     return item
 
-def flatten(item, key=None):
+def flatten(item, key=None, keypath=None):
     flat_item = item
     if isinstance(item, dict):
         flat_item = dict()
-        for key, value in item.iteritems():
-            flat_item[key] = flatten(value, key)
+        for k, v in item.iteritems():
+            kp = k if key is None else '{}.{}'.format(keypath, k)
+            flat_item[k] = flatten(v, k, kp)
     elif isinstance(item, list):
         flat_item = list()
+        index = 0
         for value in item:
-            nv = flatten(value)
+            kp = '{}[{}]'.format(keypath, index)
+            nv = flatten(value, keypath=kp)
             if isinstance(nv, list):
                 flat_item += nv
             else:
                 flat_item.append(nv)
+            index += 1
     else:
-        flat_item = clean(item, key)
+        flat_item = clean(item, key, keypath)
     return flat_item
 
 def main(reprocess=False):
@@ -37,20 +46,20 @@ def main(reprocess=False):
     collection = db.attachments
 
     for attachment in collection.find():
-        print >> sys.stderr, 'Flattening {}'.format(attachment['filename'])
+        print >> sys.stderr, 'Cleaning {}'.format(attachment['filename'])
         if not attachment.has_key('ast'):
-            print '    -> Nothing to flatten'
+            print '    -> Nothing to clean'
             continue
         else:
             if attachment.has_key('flat_ast'):
                 if reprocess == False:
-                    print '    -> Already Flattened'
+                    print '    -> Already Clean'
                     continue
                 else:
-                    print '    -> Reflattening'
-
+                    print '    -> Recleaning'
+            else:
+                print '    -> Cleaning'
         ast = attachment['ast']
-        print '    -> Flattening'
         attachment['flat_ast'] = flatten(ast)
         collection.save(attachment)
 
