@@ -4,8 +4,7 @@ from sqlalchemy import and_
 
 from blb.models.core import Base
 from blb.models.fangraphs import Season, Player, \
-    PlayerSeason, Batting
-from blb.models.mlb import Team
+    PlayerSeason, Batting, Team
 
 Session = sessionmaker()
 

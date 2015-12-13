@@ -3,7 +3,21 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Float, Integer, String
 
 from blb.models.core import Base
-from blb.models.mlb import Team as MLBTeam
+
+class Team(Base):
+    """MLB Teams"""
+    __tablename__ = 'fg_team'
+
+    id = Column(Integer, primary_key=True)
+    location = Column(String(30))
+    nickname = Column(String(30))
+    abbreviation = Column(String(4))
+
+    # many to many Team<->FGPlayerSeason
+#    player_seasons = relationship('FGPlayerSeason',
+#                                  secondary=player_seasons_teams,
+#                                  back_populates='mlb_teams')
+
 
 class Season(Base):
     """A single season"""

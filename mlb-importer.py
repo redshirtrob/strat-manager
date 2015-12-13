@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from blb.models.core import Base
-from blb.models.mlb import Team
+from blb.models.fangraphs import Team
 
 Session = sessionmaker()
 
