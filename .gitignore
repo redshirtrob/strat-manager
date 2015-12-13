@@ -20,3 +20,5 @@
 *.org
 
 data-files/*
+fg-data-files/*
+data/*
