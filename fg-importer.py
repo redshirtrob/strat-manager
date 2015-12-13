@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import and_
 
 from blb.models.core import Base
-from blb.models.fangraphs import Season, Player, Batting
+from blb.models.fangraphs import Season, Player, \
+    PlayerSeason, Batting
 from blb.models.mlb import Team
 
 Session = sessionmaker()
@@ -71,13 +73,20 @@ def main(data_file, year):
                 first_name, last_name = [name.strip() for name in values[0].split(' ', 1)]
                 player = Player(id=player_id, last_name=last_name, first_name=first_name)
                 session.add(player)
+
+            # Determine if player exists for this season
+            player_season = session.query(PlayerSeason).\
+                            filter(and_(PlayerSeason.player_id == player.id,
+                                        PlayerSeason.season_id == season.id)).first()
+            if player_season is None:
+                player_season = PlayerSeason(player_id=player.id, season_id=season.id)
+                session.add(player_season)
             
             # team = session.query(Team).filter(Team.nickname == values[1]).first()
             
             batting_values = values[2:-1]
             kwargs = dict(zip(keys, batting_values))
-            kwargs['player_id'] = player.id
-            kwargs['season_id'] = season.id
+            kwargs['player_season_id'] = player_season.id
             batting = Batting(**kwargs)
             session.add(batting)
             count += 1

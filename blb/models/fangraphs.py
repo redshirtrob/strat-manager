@@ -22,9 +22,9 @@ class Player(Base):
     first_name = Column(String(30))
 
 
-player_season_teams = Table('player_season_teams', Base.metadata,
-                            Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
-                            Column('mlb_team_id', ForeignKey('mlb_team.id'), primary_key=True))
+#player_season_teams = Table('player_season_teams', Base.metadata,
+#                            Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
+#                            Column('mlb_team_id', ForeignKey('mlb_team.id'), primary_key=True))
 
 
 class PlayerSeason(Base):
@@ -32,6 +32,8 @@ class PlayerSeason(Base):
     __tablename__ = 'fg_player_season'
 
     id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('fg_player.id'))
+    season_id = Column(Integer, ForeignKey('fg_season.id'))
 
     # many to many PlayerSeason<->MLBTeam
 #    teams = relationship('MLBTeam',
@@ -47,8 +49,7 @@ class Batting(Base):
     __tablename__ = 'fg_batting'
 
     id = Column(Integer, primary_key=True)
-    player_id = Column(Integer, ForeignKey('fg_player.id'))
-    season_id = Column(Integer, ForeignKey('fg_season.id'))
+    player_season_id = Column(Integer, ForeignKey('fg_player_season.id'))
 
     g = Column(Integer)
     pa = Column(Integer)
