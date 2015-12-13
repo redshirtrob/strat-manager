@@ -4,6 +4,11 @@ from sqlalchemy import Column, Float, Integer, String
 
 from blb.models.core import Base
 
+
+fg_player_season_teams = Table('fg_player_season_teams', Base.metadata,
+                               Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
+                               Column('fg_team_id', ForeignKey('fg_team.id'), primary_key=True))
+
 class Team(Base):
     """MLB Teams"""
     __tablename__ = 'fg_team'
@@ -13,10 +18,13 @@ class Team(Base):
     nickname = Column(String(30))
     abbreviation = Column(String(4))
 
-    # many to many Team<->FGPlayerSeason
-#    player_seasons = relationship('FGPlayerSeason',
-#                                  secondary=player_seasons_teams,
-#                                  back_populates='mlb_teams')
+    # many to many Team<->PlayerSeason
+    player_seasons = relationship('PlayerSeason',
+                                  secondary=fg_player_season_teams,
+                                  back_populates='teams')
+
+    def __repr__(self):
+        return "<Team({} {})>".format(self.location, self.nickname)
 
 
 class Season(Base):
@@ -25,6 +33,11 @@ class Season(Base):
 
     id = Column(Integer, primary_key=True)
     year = Column(String(4))
+
+    player_seasons = relationship("PlayerSeason")
+
+    def __repr__(self):
+        return "<Season({})>".format(self.year)
     
     
 class Player(Base):
@@ -35,24 +48,51 @@ class Player(Base):
     last_name = Column(String(30))
     first_name = Column(String(30))
 
+    player_seasons = relationship("PlayerSeason")
 
-#player_season_teams = Table('player_season_teams', Base.metadata,
-#                            Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
-#                            Column('mlb_team_id', ForeignKey('mlb_team.id'), primary_key=True))
+    def __repr__(self):
+        return "<Player({})>".format(self.fullname)
+
+    @property
+    def fullname(self):
+        return "{} {}".format(self.first_name, self.last_name)
 
 
 class PlayerSeason(Base):
-    """Relate player/season to teams"""
+    """Relate player/season/team/stats
+    
+    This model creates a relationship between a Player and Season
+    model with the teams and statistics models for that player and
+    that season.
+    """
     __tablename__ = 'fg_player_season'
 
     id = Column(Integer, primary_key=True)
-    player_id = Column(Integer, ForeignKey('fg_player.id'))
-    season_id = Column(Integer, ForeignKey('fg_season.id'))
 
-    # many to many PlayerSeason<->MLBTeam
-#    teams = relationship('MLBTeam',
-#                         secondary=player_season_teams,
-#                         back_populates='fg_player_seasons')
+    # Basic Player data
+    player_id = Column(Integer, ForeignKey('fg_player.id'))
+    player = relationship("Player", uselist=False)
+
+    # Basic Season data
+    season_id = Column(Integer, ForeignKey('fg_season.id'))
+    season = relationship("Season", back_populates="player_seasons", uselist=False)
+
+    # Teams the player played for during the season
+    teams = relationship('Team',
+                         secondary=fg_player_season_teams,
+                         back_populates='player_seasons')
+
+    # Batting statistics for the season
+    batting = relationship('Batting', back_populates="player_season", uselist=False)
+
+    # Pitching statistics for the season
+    pitching = relationship('Pitching', back_populates="player_season", uselist=False)
+
+    def __repr__(self):
+        return "<PlayerSeason(Player={}, Season={})>".format(
+            self.player.fullname,
+            self.season.year
+        )
 
     
 # "Name","Team","G","PA","HR","R","RBI","SB","BB%","K%","ISO","BABIP","AVG","OBP","SLG",
@@ -64,6 +104,7 @@ class Batting(Base):
 
     id = Column(Integer, primary_key=True)
     player_season_id = Column(Integer, ForeignKey('fg_player_season.id'))
+    player_season = relationship("PlayerSeason", back_populates="batting", uselist=False)
 
     g = Column(Integer)
     pa = Column(Integer)
@@ -99,6 +140,12 @@ class Batting(Base):
     fb = Column(Integer)
     ld = Column(Integer)
     iffb = Column(Integer)
+
+    def __repr__(self):
+        return "<Batting(Player={}, Season={})>".format(
+            self.player_season.player.fullname,
+            self.player_season.season.year
+        )
     
     
 # "Name","Team","W","L","SV","G","GS","IP","K/9","BB/9","HR/9","BABIP","LOB%","GB%","HR/FB",
@@ -109,5 +156,44 @@ class Pitching(Base):
     __tablename__ = 'fg_pitching'
 
     id = Column(Integer, primary_key=True)
-    player_id = Column(Integer, ForeignKey('fg_player.id'))
-    season_id = Column(Integer, ForeignKey('fg_season.id'))
+    player_season_id = Column(Integer, ForeignKey('fg_player_season.id'))
+    player_season = relationship("PlayerSeason", back_populates="pitching", uselist=False)
+
+    w = Column(Integer)
+    l = Column(Integer)
+    sv = Column(Integer)
+    g = Column(Integer)
+    gs = Column(Integer)
+    ip = Column(Float)
+    k_per_9 = Column(Float)
+    bb_per_9 = Column(Float)
+    hr_per_9 = Column(Float)
+    babip = Column(Float)
+    lob_pct = Column(Float)
+    gb_pct = Column(Float)
+    hr_per_fb = Column(Float)
+    era = Column(Float)
+    fip = Column(Float)
+    xfip = Column(Float)
+    war = Column(Float)
+    cg = Column(Integer)
+    h = Column(Integer)
+    r = Column(Integer)
+    er = Column(Integer)
+    hr = Column(Integer)
+    bb = Column(Integer)
+    ibb = Column(Integer)
+    hbp = Column(Integer)
+    wp = Column(Integer)
+    bk = Column(Integer)
+    so = Column(Integer)
+    gb = Column(Integer)
+    fb = Column(Integer)
+    ld = Column(Integer)
+
+    def __repr__(self):
+        return "<Pitching(Player={}, Season={})>".format(
+            self.player_season.player.fullname,
+            self.player_season.season.year
+        )
+    
