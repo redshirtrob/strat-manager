@@ -7,9 +7,9 @@ import os
 import quopri
 import tnefparse
 
-from bs4 import BeautifulSoup
-
 from pymongo import MongoClient
+
+from strat.utils import get_report_type, get_title
 
 def extract_html_from_text_html(part):
     return [part.get_payload(decode=True)]
@@ -26,46 +26,15 @@ def extract_html_from_application_ms_tnef(message=None, part=None):
     tnef = tnefparse.TNEF(decoded_part)
     return [attachment.data for attachment in tnef.attachments]
 
-def get_title(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    title = soup.find('title')
-    if title is not None:
-        return title.contents[0]
-    return "No Title"
-
-def get_type(html):
-    attachment_type = "Unknown"
-    soup = BeautifulSoup(html, 'html.parser')
-    title = soup.find('title')
-    fonts = soup.find_all('font')
-    if title is not None and title.string == 'Strat-O-Matic Daily Report':
-        attachment_type = 'League Daily'
-    elif fonts is not None:
-        for font in fonts:
-            contents = font.string
-            if contents is None:
-                continue
-            
-            if contents.startswith('BOXSCORE'):
-                attachment_type = 'Game Daily'
-                break
-            elif contents.startswith('*** TOP OF INNING 1 ***'):
-                attachment_type = 'Game Scorebook'
-                break
-            elif contents.startswith('LEAGUE STANDINGS'):
-                attachment_type = 'League Standings'
-                break
-    return attachment_type
-
-def main(mbox_file, stash_directory=None):
+def main(mbox_file, stash_directory=None, use_db=False):
     mbox = mailbox.mbox(mbox_file)
     should_stash = stash_directory is not None
 
-    client = MongoClient('mongodb://localhost:27017')
-    db = client.get_database('extractor')
-    client.drop_database(db)
-
-    collection = db.attachments
+    if use_db:
+        client = MongoClient('mongodb://localhost:27017')
+        db = client.get_database('extractor')
+        client.drop_database(db)
+        collection = db.attachments
 
     total_attachment_count = 0
     attachment_count = 0
@@ -98,7 +67,7 @@ def main(mbox_file, stash_directory=None):
                     print "Skipping: {}".format(content_type)
 
             for attachment in attachments:
-                attachment_type = get_type(attachment)
+                attachment_type = get_report_type(attachment)
                 print "\tTitle: {} ({})".format(get_title(attachment), attachment_type)
                 
                 document = {'message_id' : message_id,
@@ -112,7 +81,9 @@ def main(mbox_file, stash_directory=None):
                     with open(full_path, 'w') as f:
                         f.write(attachment)
                     print "\t\tFile: {}".format(filename)
-                collection.insert_one(document)
+
+                if use_db:
+                    collection.insert_one(document)
                 attachment_count += 1
                 count += 1
             total_attachment_count += len(attachments)
@@ -123,7 +94,8 @@ def main(mbox_file, stash_directory=None):
             print "\tExtracted {} data file(s) from {}".format(count, subject)
         current_message_index += 1
     print "Extracted {} attachments from data set".format(total_attachment_count)
-    client.close()
+    if use_db:
+        client.close()
             
 if __name__ == '__main__':
     import argparse
@@ -131,7 +103,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract Strat-O-Matic Report files from email')
     parser.add_argument('--stash', nargs='?', dest='dir',
                         help='directory to dump attachment contents')
+    parser.add_argument('--use-db', action='store_true', default=False,
+                        help='insert data files into a database')
     parser.add_argument('file', metavar='FILE', help='the mailbox file to parse')
     args = parser.parse_args()
 
-    main(args.file, args.dir)
+    main(args.file, args.dir, args.use_db)

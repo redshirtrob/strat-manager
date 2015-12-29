@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 8, 29, 22, 15, 33, 5)
+__version__ = (2015, 12, 14, 5, 38, 5, 0)
 
 __all__ = [
     'GameReportParser',

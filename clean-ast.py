@@ -6,39 +6,7 @@ import operator
 
 from pymongo import MongoClient
 
-INT_KEYS = ('part', 'game_count', 'season_count', )
-
-def clean(item, key, keypath):
-    if item is None and key in INT_KEYS:
-        item = '1'
-    elif isinstance(item, str) or isinstance(item, unicode):
-        item = item.strip()
-        if (key == 'name' or key == 'player_name') and item.endswith('-'):
-            item = item.rstrip('-')
-            
-    return item
-
-def flatten(item, key=None, keypath=None):
-    flat_item = item
-    if isinstance(item, dict):
-        flat_item = dict()
-        for k, v in item.iteritems():
-            kp = k if key is None else '{}.{}'.format(keypath, k)
-            flat_item[k] = flatten(v, k, kp)
-    elif isinstance(item, list):
-        flat_item = list()
-        index = 0
-        for value in item:
-            kp = '{}[{}]'.format(keypath, index)
-            nv = flatten(value, keypath=kp)
-            if isinstance(nv, list):
-                flat_item += nv
-            else:
-                flat_item.append(nv)
-            index += 1
-    else:
-        flat_item = clean(item, key, keypath)
-    return flat_item
+from strat.utils import flatten
 
 def main(reprocess=False):
     client = MongoClient('mongodb://localhost:27017')
@@ -46,7 +14,10 @@ def main(reprocess=False):
     collection = db.attachments
 
     for attachment in collection.find():
-        print >> sys.stderr, 'Cleaning {}'.format(attachment['filename'])
+        if attachment.has_key('filename'):
+            print >> sys.stderr, 'Cleaning {}'.format(attachment['filename'])
+        else:
+            print >> sys.stderr, 'Cleaning {}'.format(attachment['message_id'])
         if not attachment.has_key('ast'):
             print '    -> Nothing to clean'
             continue

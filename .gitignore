@@ -20,6 +20,7 @@
 *.org
 
 data-files/*
+raw-asts/*
 fg-data-files/*
 data/*
 *.db

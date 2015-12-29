@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+import sys
 
 from bs4 import BeautifulSoup
 from GameReport import GameReportParser
@@ -52,7 +53,11 @@ def main(reprocess=False):
     collection = db.attachments
 
     for attachment in collection.find():
-        print 'Processing {}'.format(attachment['filename'])
+        if attachment.has_key('filename'):
+            print >> sys.stderr, 'Processing {}'.format(attachment['filename'])
+        else:
+            print >> sys.stderr, 'Processing {}'.format(attachment['message_id'])
+
         if attachment.has_key('ast'):
             if reprocess == False:
                 print '    -> Already Processed'
