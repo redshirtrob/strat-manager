@@ -25,7 +25,7 @@ $ ./extractor.py file.mbox
 ```
 
 ### Generating the Grako Parser
-Before using hte parsers you need to generate the Grako Parser file.
+Before using the parsers you need to generate the Grako Parser file.
 This file is pre-generated as a convenience, but if you need to make
 changes you can generate a new version as follows:
 ```bash

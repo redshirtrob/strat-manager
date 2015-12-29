@@ -41,7 +41,7 @@ def get_title(html):
 INT_KEYS = ('part', 'game_count', 'season_count', )
 NAME_KEYS = ('name', 'player_name')
 
-def clean(item, key, keypath):
+def clean(item, key):
     """Sanitize some parsing artifacts"""
 
     # These keys should have null values converted to '1'
@@ -56,25 +56,23 @@ def clean(item, key, keypath):
             item = item.rstrip('-')
     return item
 
-def flatten(item, key=None, keypath=None, should_clean=True):
+def flatten(item, key=None, should_clean=True):
     """Remove redundant nesting"""
     flat_item = item
     if isinstance(item, dict):
         flat_item = dict()
         for k, v in item.iteritems():
-            kp = k if key is None else '{}.{}'.format(keypath, k)
-            flat_item[k] = flatten(v, k, kp, should_clean)
+            flat_item[k] = flatten(v, k, should_clean)
     elif isinstance(item, list):
         flat_item = list()
         index = 0
         for value in item:
-            kp = '{}[{}]'.format(keypath, index)
-            nv = flatten(value, keypath=kp, should_clean=should_clean)
+            nv = flatten(value, should_clean=should_clean)
             if isinstance(nv, list):
                 flat_item += nv
             else:
                 flat_item.append(nv)
             index += 1
     elif should_clean:
-        flat_item = clean(item, key, keypath)
+        flat_item = clean(item, key)
     return flat_item

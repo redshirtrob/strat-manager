@@ -60,8 +60,9 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False):
         rootname = os.path.splitext(os.path.basename(filename))[0]
         dst_filename = '{}-ast.dat'.format(rootname)
         full_path = os.path.join(stash_directory, dst_filename)
+        stash_ast = ast if skip_clean else flat_ast
         with open(full_path, 'w') as f:
-            json.dump(ast, f, indent=2)
+            json.dump(stash_ast, f, indent=2)
 
 if __name__ == '__main__':
     import argparse
