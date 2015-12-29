@@ -1,51 +1,11 @@
 #!/usr/bin/env python
 
-import json
 import sys
-
-from bs4 import BeautifulSoup
-from GameReport import GameReportParser
 from pymongo import MongoClient
-from grako.exceptions import FailedToken
 
-def parse_league_daily(content):
-    soup = BeautifulSoup(content, 'html.parser')
-    tables = soup.find_all('table')
-
-    parser = GameReportParser(parseinfo=False)
-
-    print '    -> Processing stories'
-    stories_ast = None
-    for table in tables:
-        try:
-            stories_ast = parser.parse(table.prettify(), 'game_story_table')
-            break
-        except FailedToken:
-            pass
-
-    print '    -> Processing boxscores'
-    boxscores_ast = None
-    for table in tables:
-        try:
-            boxscores_ast = parser.parse(table.prettify(), 'boxscore_table')
-            break
-        except FailedToken:
-            pass
-
-    if stories_ast is None or boxscores_ast is None:
-        raise Exception
-
-    return {'game_stories' : stories_ast, 'boxscores' : boxscores_ast}
-
-def parse_game_daily(content):
-    soup = BeautifulSoup(content, 'html.parser')
-    full_recap = soup.find('pre')
-    full_recap_string = full_recap.prettify()
-
-    parser = GameReportParser(parseinfo=False)
-    print '    -> Processing combined'
-    ast = parser.parse(full_recap_string, 'full_recap')
-    return ast
+from strat.parse import parse_league_daily, parse_game_daily
+from strat.utils import flatten
+from strat.utils import REPORT_TYPE_LEAGUE_DAILY, REPORT_TYPE_GAME_DAILY
 
 def main(reprocess=False):
     client = MongoClient('mongodb://localhost:27017')
@@ -66,9 +26,9 @@ def main(reprocess=False):
                 print '    -> Reprocessing'
         
         ast = None
-        if attachment['type'] == 'League Daily':
+        if attachment['type'] == REPORT_TYPE_LEAGUE_DAILY:
             ast = parse_league_daily(attachment['content'])
-        elif attachment['type'] == 'Game Daily':
+        elif attachment['type'] == REPORT_TYPE_GAME_DAILY:
             ast = parse_game_daily(attachment['content'])
         else:
             print '    -> Skipping {} ({})'.format(
@@ -78,6 +38,7 @@ def main(reprocess=False):
 
         if ast is not None:
             attachment['ast'] = ast
+            attachment['flat_ast'] = flatten(ast)
             collection.save(attachment)
 
 if __name__ == '__main__':

@@ -14,10 +14,10 @@ running:
 $ mongod --config /usr/local/etc/mongod.conf
 ```
 
-### Extract attachments from mbox file
+### Extract reports from mbox file
 This is an optional script for extracting dailies, scorebooks, and
 standings files from an mbox file.  This script exists because I had a
-large number of files stored as attachments in a gmail account.  The
+large number of files stored as reports in a gmail account.  The
 easiest way to get access to them was to export the data as an mbox
 file using Gmail's export tools.
 ```bash
@@ -32,16 +32,22 @@ changes you can generate a new version as follows:
 $ grako GameReport.ebnf >GameReport.py
 ```
 
-### Parsing attachments into AST
-This is a helper script for parsing dailies.  
+### Batch parsing all reports
+You can batch process all report files.
 ```bash
-$ ./parse-data.py ./file.dat
+$ ./parse-data.py
 ```
 
-### Parsing a single League Daily file
-You can process a single League Daily file into an AST as follows:
+Use the `-r` option to reprocess all the files.
 ```bash
-$ ./parse-league-daily.py  --stash=./raw-asts ./file.dat
+$ ./parse-data.py -r
+```
+
+### Parsing a single report
+You can process a single report file into an AST as follows:
+```bash
+$ ./parse-report.py --stash=./raw-asts ./sample/league-daily.dat
+$ ./parse-report.py --stash=./raw-asts ./sample/game-daily.ast
 ```
 
 This will generate an AST from the HTML Report file and store it in a
@@ -50,8 +56,3 @@ file called `./raw-asts/file-ast.dat`.
 You can also insert the AST into a MongoDB database with the
 `--use-db` option.  You can skip the AST cleaning phase by passing the
 `--skip-clean` option.
-
-### Cleaning AST
-```bash
-$ ./clean-ast.py
-```

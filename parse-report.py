@@ -1,40 +1,28 @@
 #!/usr/bin/env python
 
-from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import json
 import os
 
-from GameReport import GameReportParser
+from strat.parse import parse_league_daily, parse_game_daily
 from strat.utils import get_report_type, get_title, flatten
-from strat.utils import REPORT_TYPE_LEAGUE_DAILY
+from strat.utils import REPORT_TYPE_LEAGUE_DAILY, REPORT_TYPE_GAME_DAILY
 
 def main(filename, stash_directory=None, use_db=False, skip_clean=False):
+    should_stash = stash_directory is not None
+    
     with open(filename, 'r') as f:
         html = f.read()
-    soup = BeautifulSoup(html, 'html.parser')
 
-    should_stash = stash_directory is not None
     report_type = get_report_type(html)
     print "Report Type: {}".format(report_type)
-    if report_type != REPORT_TYPE_LEAGUE_DAILY:
+    if report_type == REPORT_TYPE_LEAGUE_DAILY:
+        ast = parse_league_daily(html)
+    elif report_type == REPORT_TYPE_GAME_DAILY:
+        ast = parse_game_daily(html)
+    else:
         raise Exception("Invalid Type: {}".format(report_type))
-    
-    tables = soup.find_all('table')
 
-    stories_index = len(tables)-3
-    stories = tables[stories_index]
-    stories_string = stories.prettify()
-
-    boxscores_index = len(tables)-2
-    boxscores = tables[boxscores_index]
-    boxscores_string = boxscores.prettify()
-
-    parser = GameReportParser(parseinfo=False)
-    stories_ast = parser.parse(stories_string, 'game_story_table')
-    boxscores_ast = parser.parse(boxscores_string, 'boxscore_table')
-
-    ast = {'stories' : stories_ast, 'boxscores' : boxscores_ast}
     if not skip_clean:
         flat_ast = flatten(ast)
 
