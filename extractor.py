@@ -24,7 +24,7 @@ def extract_html_from_application_ms_tnef(message=None, part=None):
         print "Don't know how to decode: '{}'".format(cte)
         
     tnef = tnefparse.TNEF(decoded_part)
-    return [attachment.data for attachment in tnef.attachments]
+    return [report.data for report in tnef.attachments]
 
 def main(mbox_file, stash_directory=None, use_db=False):
     mbox = mailbox.mbox(mbox_file)
@@ -34,10 +34,10 @@ def main(mbox_file, stash_directory=None, use_db=False):
         client = MongoClient('mongodb://localhost:27017')
         db = client.get_database('extractor')
         client.drop_database(db)
-        collection = db.attachments
+        collection = db.reports
 
-    total_attachment_count = 0
-    attachment_count = 0
+    total_report_count = 0
+    report_count = 0
     current_message_index = 0
     for message in mbox:
         subject = message['subject']
@@ -56,44 +56,44 @@ def main(mbox_file, stash_directory=None, use_db=False):
             if isinstance(part, str):
                 continue
 
-            attachments = []
+            reports = []
             content_type = part.get_content_type()
             if content_type == 'text/html':
-                attachments = extract_html_from_text_html(part)
+                reports = extract_html_from_text_html(part)
             elif content_type == 'application/ms-tnef':
-                attachments = extract_html_from_application_ms_tnef(message, part)
+                reports = extract_html_from_application_ms_tnef(message, part)
             else:
                 if content_type != 'text/plain' and content_type != 'multipart/alternative':
                     print "Skipping: {}".format(content_type)
 
-            for attachment in attachments:
-                attachment_type = get_report_type(attachment)
-                print "\tTitle: {} ({})".format(get_title(attachment), attachment_type)
+            for report in reports:
+                report_type = get_report_type(report)
+                print "\tTitle: {} ({})".format(get_title(report), report_type)
                 
                 document = {'message_id' : message_id,
                             'subject' : subject,
-                            'content' : attachment,
-                            'type' : attachment_type}
+                            'content' : report,
+                            'type' : report_type}
                 if should_stash:
-                    filename = '{}.dat'.format(attachment_count)
+                    filename = '{}.dat'.format(report_count)
                     full_path = os.path.join(stash_directory, filename)
                     document['filename'] = full_path
                     with open(full_path, 'w') as f:
-                        f.write(attachment)
+                        f.write(report)
                     print "\t\tFile: {}".format(filename)
 
                 if use_db:
                     collection.insert_one(document)
-                attachment_count += 1
+                report_count += 1
                 count += 1
-            total_attachment_count += len(attachments)
+            total_report_count += len(reports)
                 
         if count == 0:
             print "\tERROR: Couldn't extract data from {}".format(subject)
         else:
             print "\tExtracted {} data file(s) from {}".format(count, subject)
         current_message_index += 1
-    print "Extracted {} attachments from data set".format(total_attachment_count)
+    print "Extracted {} reports from data set".format(total_report_count)
     if use_db:
         client.close()
             
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Extract Strat-O-Matic Report files from email')
     parser.add_argument('--stash', nargs='?', dest='dir',
-                        help='directory to dump attachment contents')
+                        help='directory to dump report contents')
     parser.add_argument('--use-db', action='store_true', default=False,
                         help='insert data files into a database')
     parser.add_argument('file', metavar='FILE', help='the mailbox file to parse')

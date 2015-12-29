@@ -29,7 +29,7 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False):
     if use_db:
         client = MongoClient('mongodb://localhost:27017')
         db = client.get_database('extractor')
-        collection = db.attachments
+        collection = db.reports
 
         document = {'filename': os.path.basename(filename),
                     'subject': '',

@@ -11,18 +11,18 @@ from strat.utils import flatten
 def main(reprocess=False):
     client = MongoClient('mongodb://localhost:27017')
     db = client.get_database('extractor')
-    collection = db.attachments
+    collection = db.reports
 
-    for attachment in collection.find():
-        if attachment.has_key('filename'):
-            print >> sys.stderr, 'Cleaning {}'.format(attachment['filename'])
+    for report in collection.find():
+        if report.has_key('filename'):
+            print >> sys.stderr, 'Cleaning {}'.format(report['filename'])
         else:
-            print >> sys.stderr, 'Cleaning {}'.format(attachment['message_id'])
-        if not attachment.has_key('ast'):
+            print >> sys.stderr, 'Cleaning {}'.format(report['message_id'])
+        if not report.has_key('ast'):
             print '    -> Nothing to clean'
             continue
         else:
-            if attachment.has_key('flat_ast'):
+            if report.has_key('flat_ast'):
                 if reprocess == False:
                     print '    -> Already Clean'
                     continue
@@ -30,9 +30,9 @@ def main(reprocess=False):
                     print '    -> Recleaning'
             else:
                 print '    -> Cleaning'
-        ast = attachment['ast']
-        attachment['flat_ast'] = flatten(ast)
-        collection.save(attachment)
+        ast = report['ast']
+        report['flat_ast'] = flatten(ast)
+        collection.save(report)
 
 if __name__ == '__main__':
     import argparse

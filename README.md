@@ -1,4 +1,4 @@
-# BLB Extractor
+# Strat-O-Matic Extractor
 
 This is a series of scripts for extracting and processing data from
 Strat-O-Matic game files.  The game data is stored in three types of
@@ -21,7 +21,7 @@ large number of files stored as reports in a gmail account.  The
 easiest way to get access to them was to export the data as an mbox
 file using Gmail's export tools.
 ```bash
-$ ./extractor.py file.mbox
+$ ./extractor.py --stash=./data-files --use-db sample/gmail.mbox
 ```
 
 ### Generating the Grako Parser
@@ -46,8 +46,8 @@ $ ./parse-data.py -r
 ### Parsing a single report
 You can process a single report file into an AST as follows:
 ```bash
-$ ./parse-report.py --stash=./raw-asts ./sample/league-daily.dat
-$ ./parse-report.py --stash=./raw-asts ./sample/game-daily.ast
+$ ./parse-report.py --stash=./raw-asts ./sample/league-daily.report
+$ ./parse-report.py --stash=./raw-asts ./sample/game-daily.report
 ```
 
 This will generate an AST from the HTML Report file and store it in a

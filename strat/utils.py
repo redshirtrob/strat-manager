@@ -7,12 +7,12 @@ REPORT_TYPE_LEAGUE_STANDINGS = 'League Standings'
 
 def get_report_type(html):
     """Determine the report type for an HTML document"""
-    attachment_type = "Unknown"
+    report_type = "Unknown"
     soup = BeautifulSoup(html, 'html.parser')
     title = soup.find('title')
     fonts = soup.find_all('font')
     if title is not None and title.string == 'Strat-O-Matic Daily Report':
-        attachment_type = REPORT_TYPE_LEAGUE_DAILY
+        report_type = REPORT_TYPE_LEAGUE_DAILY
     elif fonts is not None:
         for font in fonts:
             contents = font.string
@@ -20,15 +20,15 @@ def get_report_type(html):
                 continue
             
             if contents.startswith('BOXSCORE'):
-                attachment_type = REPORT_TYPE_GAME_DAILY
+                report_type = REPORT_TYPE_GAME_DAILY
                 break
             elif contents.startswith('*** TOP OF INNING 1 ***'):
-                attachment_type = REPORT_TYPE_GAME_SCOREBOOK
+                report_type = REPORT_TYPE_GAME_SCOREBOOK
                 break
             elif contents.startswith('LEAGUE STANDINGS'):
-                attachment_type = REPORT_TYPE_LEAGUE_STANDINGS
+                report_type = REPORT_TYPE_LEAGUE_STANDINGS
                 break
-    return attachment_type
+    return report_type
 
 def get_title(html):
     """Extract the title from an HTML document"""
