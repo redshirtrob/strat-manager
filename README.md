@@ -56,3 +56,28 @@ file called `./raw-asts/file-ast.dat`.
 You can also insert the AST into a MongoDB database with the
 `--use-db` option.  You can skip the AST cleaning phase by passing the
 `--skip-clean` option.
+
+# Importers
+
+This is a series of scripts to import team and statistical data into a
+database.
+
+### Team Importer
+
+Generate a table of baseball teams.  This table is a prerequisite for
+the Fangraphs importer, found below.
+```bash
+$ ./mlb-importer.py ./data/mlb.csv
+```
+
+### Fangraphs Importer
+
+Import a CSV from [Fangraphs](http://www.fangraphs.com).  See the
+`Batting` and `Pitching` models for a list of the supported
+statistical categories.  It's easy to add more, but these are the ones
+I found most interesting.
+```bash
+$ ./fg-importer.py ./fg.csv
+```
+
+
