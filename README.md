@@ -21,6 +21,7 @@ large number of files stored as reports in a gmail account.  The
 easiest way to get access to them was to export the data as an mbox
 file using Gmail's export tools.
 ```bash
+$ mkdir ./data-files
 $ ./extractor.py --stash=./data-files --use-db sample/gmail.mbox
 ```
 
@@ -46,6 +47,7 @@ $ ./parse-data.py -r
 ### Parsing a single report
 You can process a single report file into an AST as follows:
 ```bash
+$ mkdir ./raw-asts
 $ ./parse-report.py --stash=./raw-asts ./sample/league-daily.report
 $ ./parse-report.py --stash=./raw-asts ./sample/game-daily.report
 ```
