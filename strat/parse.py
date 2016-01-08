@@ -20,7 +20,8 @@ class GameReportSemanticActions(object):
                 return nickname
         return None
 
-    def annual_team(self, phrase, year):
+    def annual_team(self, phrase):
+        year = phrase.partition(' ')[0]
         city = self.find_city(phrase)
         nickname = self.find_nickname(phrase)
         if city is None or nickname is None:
@@ -44,11 +45,17 @@ class GameReportSemanticActions(object):
 
         home_parts = home_phrase.split()
         parser = GameReportParser()
-        mdy = parser.parse(home_parts[-1], rule_name='mdy')
-        month, day, year = mdy.split('/')
+
+        # Try to parse date of form mm/dd/yyyy
+        # Sometimes it's not present so we just skip it
+        try:
+            mdy = parser.parse(home_parts[-1], rule_name='mdy')
+        except Exception:
+            mdy = ''
+            pass
             
-        away = self.annual_team(away_phrase, year)
-        home = self.annual_team(home_phrase, year)
+        away = self.annual_team(away_phrase)
+        home = self.annual_team(home_phrase)
 
         if away is None or home is None:
             raise Exception
