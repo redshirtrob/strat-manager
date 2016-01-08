@@ -58,7 +58,7 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False):
     if report_type == REPORT_TYPE_LEAGUE_DAILY:
         ast = parse_league_daily(html, cities=CITIES, nicknames=NICKNAMES)
     elif report_type == REPORT_TYPE_GAME_DAILY:
-        ast = parse_game_daily(html)
+        ast = parse_game_daily(html, cities=CITIES, nicknames=NICKNAMES)
     else:
         raise Exception("Invalid Type: {}".format(report_type))
 

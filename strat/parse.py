@@ -27,6 +27,14 @@ class GameReportSemanticActions(object):
             return None
         return AST(city=unicode(city), nickname=unicode(nickname), year=year)
 
+    def validate_nickname(self, nickname):
+        if nickname is None:
+            raise Exception
+
+        nickname = self.find_nickname(nickname.lower())
+        if nickname is None:
+            raise Exception
+
     def boxscore_matchup(self, ast):
         if ast.phrase is None:
             raise Exception
@@ -46,6 +54,35 @@ class GameReportSemanticActions(object):
             raise Exception
 
         return AST(home=home, away=away, date=mdy)
+
+    def game_story_header(self, ast):
+        if ast.phrase is None:
+            return Exception
+
+        phrase = ast.phrase.lower()
+        away, home = phrase.split(' at ')
+
+        return AST(home=unicode(home), away=unicode(away))
+
+    def boxscore_pitching_header_team(self, ast):
+        self.validate_nickname(ast.nickname)
+        return ast
+
+    def boxscore_hitting_header_team(self, ast):
+        self.validate_nickname(ast.nickname)
+        return ast
+
+    def boxscore_team(self, ast):
+        self.validate_nickname(ast.nickname)
+        return ast
+
+    def boxscore_team_count_colon(self, ast):
+        self.validate_nickname(ast.nickname)
+        return ast
+
+    def boxscore_team_basic_rate(self, ast):
+        self.validate_nickname(ast.nickname)
+        return ast
 
 
 def parse_league_daily(html, cities=None, nicknames=None):
@@ -77,14 +114,15 @@ def parse_league_daily(html, cities=None, nicknames=None):
     if stories_ast is None or boxscores_ast is None:
         raise Exception
 
-    return {'game_stories' : stories_ast, 'boxscores' : boxscores_ast}
+    return AST(game_stories=stories_ast, boxscores=boxscores_ast)
 
-def parse_game_daily(html):
+def parse_game_daily(html, cities=None, nicknames=None):
     soup = BeautifulSoup(html, 'html.parser')
     full_recap = soup.find('pre')
     full_recap_string = full_recap.prettify()
 
-    parser = GameReportParser(parseinfo=False)
+    semantics = GameReportSemanticActions(cities=cities, nicknames=nicknames)
+    parser = GameReportParser(parseinfo=False, semantics=semantics)
     ast = parser.parse(full_recap_string, 'full_recap')
     return ast
 
