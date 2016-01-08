@@ -349,7 +349,7 @@ boxscore_pitching_result_stat =
     ;
 
 (* <font color="#000000">J.Lopez WIN(4-0) BS(1st)  1 1/3   1   0   0   1   0   0  24   2.96</font> *)
-(* <font color="#000000">E.Santana WIN             8 1/3   5   3   3   3   6   2 113  A1 D6</font> *)
+(* <font color="#000000">E.Santana WIN BS          8 1/3   5   3   3   3   6   2 113  A1 D6</font> *)
 boxscore_pitching_stat_line =
     >font_white
     player_name:short_name_no_result
