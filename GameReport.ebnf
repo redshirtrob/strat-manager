@@ -32,68 +32,9 @@ full_name_no_injured = ?/[A-Za-z\.\s\-\']+(?= INJURED)/? ;
 full_name_no_gem_event = ?/[A-Za-z\.\s\-\']+(?= (robbed|blocked|turns))/? ;
 full_name_no_of = ?/[A-Za-z\.\s\-\']+(?= of)/? ;
 
-city =
-    'Atlanta' |
-    'Boston' |
-    'Charlotte' |
-    'Chicago' |
-    'Cincinnati' |
-    'Cleveland' |
-    'Columbus' |
-    'Detroit' |
-    'Miami' |
-    'Montreal' |
-    'Nashville' |
-    'New Orleans' |
-    'New York' |
-    'Philadelphia' |
-    'St. Louis' |
-    'Saint Louis' |
-    'Steel City' |
-    'Washington'
-    ;
+nickname_no_sep = ?/[A-Za-z0-9\']+(?=(\:|\.|\s+AB|\s+IP|\s+\())/? ;
 
-city_caps =
-    'ATLANTA' |
-    'BOSTON' |
-    'CHARLOTTE' |
-    'CHICAGO' |
-    'CINCINNATI' |
-    'CLEVELAND' |
-    'COLUMBUS' |
-    'DETROIT' |
-    'MIAMI' |
-    'MONTREAL' |
-    'NASHVILLE' |
-    'NEW ORLEANS' |
-    'NEW YORK' |
-    'PHILADELPHIA' |
-    'ST. LOUIS' |
-    'SAINT LOUIS' |
-    'STEEL CITY' |
-    'WASHINGTON'
-    ;
-
-
-nickname =
-    'Crackers' |
-    'Blues' |
-    'Monarchs' |
-    'Northsiders' |
-    'Steamers' |
-    'Spiders' |
-    'Explorers' |
-    'Clutch' |
-    'Toros' |
-    'Souterrains' |
-    'Cats' |
-    'Mudbugs' |
-    'Knights' |
-    'Admirals' |
-    'Clydesdales' |
-    'Stogies' |
-    'Federals'
-    ;
+phrase = ?/[A-Za-z0-9\'\s\.\/]*/? ;
 
 position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'CF' | 'RF' | 'PR' | 'DH' | 'PH';
 parenthesized_position = '(' @:position ')';
@@ -168,12 +109,6 @@ half_inning =
 
 parenthesized_whole_ordinal = '(' @:whole_ordinal [')'] ;
 
-annual_team =
-    year:year
-    city:city
-    nickname:nickname
-    ;
-
 (* Box Score Rules *)
 boxscore_td_start = '<td valign="top">' ;
 boxscore_p_start = '<p class="bnorm">' ;
@@ -188,10 +123,7 @@ boxscore_header =
     
 boxscore_matchup =
     ['BOXSCORE:']
-    away:annual_team
-    ('At' | 'at')
-    home:annual_team
-    [date:mdy]
+    phrase:phrase
     ;
     
 (* <font color="#FF0000"> 2015 Chicago Northsiders At 2015 Charlotte Monarchs       7/30/2015</font> *)
@@ -204,7 +136,7 @@ boxscore_matchup_header =
 boxscore_hitting_stat_label = 'AB' | 'R' | 'H' | 'RBI' | 'AVG' ;
 
 boxscore_hitting_header_team =
-    nickname:nickname
+    nickname:nickname_no_sep
     headers:{boxscore_hitting_stat_label}
     ;
 
@@ -367,7 +299,7 @@ boxscore_team_totals =
 (* <font color="#000000">Spiders......... 0 2 1  2 0 0  2 1 0  -  8 16  3</font> *)
 boxscore_team =
     >font_white
-    nickname:nickname
+    nickname:nickname_no_sep
     ?/\.*/?
     runs:{boxscore_team_inning_runs}
     '-'
@@ -386,7 +318,7 @@ parenthesized_record = '(' @:record [')'] ;
 (* <font color="#FF0000">Spiders (40-58)          IP       H   R  ER  BB  SO  HR  PC    ERA  SCORESHEET</font> *)
 boxscore_pitching_header_team =
     >font_red
-    nickname:nickname
+    nickname:nickname_no_sep
     [record:parenthesized_record]
     headers:{boxscore_pitching_stat_label}
     >font_close
@@ -482,13 +414,13 @@ peripheral_game_data =
     ;
 
 boxscore_team_count_colon =
-    nickname:nickname
+    nickname:nickname_no_sep
     ':'
     count:whole_number
     ;
 
 boxscore_team_basic_rate =
-    nickname:nickname
+    nickname:nickname_no_sep
     ':'
     count:whole_number
     'for'
@@ -653,9 +585,7 @@ boxscore_all =
 (* <font color="#FF0000">MIAMI AT ST. LOUIS</font> *)
 game_story_header =
     >font_red
-    away:city_caps
-    'AT'
-    home:city_caps
+    phrase:phrase
     >font_close
     ;
 

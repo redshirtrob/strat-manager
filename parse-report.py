@@ -8,6 +8,45 @@ from strat.parse import parse_league_daily, parse_game_daily
 from strat.utils import get_report_type, get_title, flatten
 from strat.utils import REPORT_TYPE_LEAGUE_DAILY, REPORT_TYPE_GAME_DAILY
 
+CITIES = [
+    'Atlanta',
+    'Boston',
+    'Charlotte',
+    'Chicago',
+    'Cincinnati',
+    'Cleveland',
+    'Columbus',
+    'Detroit',
+    'Miami',
+    'Montreal',
+    'Nashville',
+    'New Orleans',
+    'New York',
+    'Philadelphia',
+    'St. Louis',
+    'Saint Louis',
+    'Steel City'
+]
+
+NICKNAMES = [
+    'Crackers',
+    'Blues',
+    'Monarchs',
+    'Northsiders',
+    'Steamers',
+    'Spiders',
+    'Explorers',
+    'Clutch',
+    'Toros',
+    'Souterrains',
+    'Cats',
+    'Mudbugs',
+    'Knights',
+    'Admirals',
+    'Clydesdales',
+    'Stogies',
+]
+
 def main(filename, stash_directory=None, use_db=False, skip_clean=False):
     should_stash = stash_directory is not None
     
@@ -17,7 +56,7 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False):
     report_type = get_report_type(html)
     print "Report Type: {}".format(report_type)
     if report_type == REPORT_TYPE_LEAGUE_DAILY:
-        ast = parse_league_daily(html)
+        ast = parse_league_daily(html, cities=CITIES, nicknames=NICKNAMES)
     elif report_type == REPORT_TYPE_GAME_DAILY:
         ast = parse_game_daily(html)
     else:

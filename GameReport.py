@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2015, 12, 14, 5, 38, 5, 0)
+__version__ = (2016, 1, 8, 5, 0, 48, 4)
 
 __all__ = [
     'GameReportParser',
@@ -138,125 +138,12 @@ class GameReportParser(Parser):
         self._pattern(r"[A-Za-z\.\s\-\']+(?= of)")
 
     @graken()
-    def _city_(self):
-        with self._choice():
-            with self._option():
-                self._token('Atlanta')
-            with self._option():
-                self._token('Boston')
-            with self._option():
-                self._token('Charlotte')
-            with self._option():
-                self._token('Chicago')
-            with self._option():
-                self._token('Cincinnati')
-            with self._option():
-                self._token('Cleveland')
-            with self._option():
-                self._token('Columbus')
-            with self._option():
-                self._token('Detroit')
-            with self._option():
-                self._token('Miami')
-            with self._option():
-                self._token('Montreal')
-            with self._option():
-                self._token('Nashville')
-            with self._option():
-                self._token('New Orleans')
-            with self._option():
-                self._token('New York')
-            with self._option():
-                self._token('Philadelphia')
-            with self._option():
-                self._token('St. Louis')
-            with self._option():
-                self._token('Saint Louis')
-            with self._option():
-                self._token('Steel City')
-            with self._option():
-                self._token('Washington')
-            self._error('expecting one of: Atlanta Boston Charlotte Chicago Cincinnati Cleveland Columbus Detroit Miami Montreal Nashville New Orleans New York Philadelphia Saint Louis St. Louis Steel City Washington')
+    def _nickname_no_sep_(self):
+        self._pattern(r"[A-Za-z0-9\']+(?=(\:|\.|\s+AB|\s+IP|\s+\())")
 
     @graken()
-    def _city_caps_(self):
-        with self._choice():
-            with self._option():
-                self._token('ATLANTA')
-            with self._option():
-                self._token('BOSTON')
-            with self._option():
-                self._token('CHARLOTTE')
-            with self._option():
-                self._token('CHICAGO')
-            with self._option():
-                self._token('CINCINNATI')
-            with self._option():
-                self._token('CLEVELAND')
-            with self._option():
-                self._token('COLUMBUS')
-            with self._option():
-                self._token('DETROIT')
-            with self._option():
-                self._token('MIAMI')
-            with self._option():
-                self._token('MONTREAL')
-            with self._option():
-                self._token('NASHVILLE')
-            with self._option():
-                self._token('NEW ORLEANS')
-            with self._option():
-                self._token('NEW YORK')
-            with self._option():
-                self._token('PHILADELPHIA')
-            with self._option():
-                self._token('ST. LOUIS')
-            with self._option():
-                self._token('SAINT LOUIS')
-            with self._option():
-                self._token('STEEL CITY')
-            with self._option():
-                self._token('WASHINGTON')
-            self._error('expecting one of: ATLANTA BOSTON CHARLOTTE CHICAGO CINCINNATI CLEVELAND COLUMBUS DETROIT MIAMI MONTREAL NASHVILLE NEW ORLEANS NEW YORK PHILADELPHIA SAINT LOUIS ST. LOUIS STEEL CITY WASHINGTON')
-
-    @graken()
-    def _nickname_(self):
-        with self._choice():
-            with self._option():
-                self._token('Crackers')
-            with self._option():
-                self._token('Blues')
-            with self._option():
-                self._token('Monarchs')
-            with self._option():
-                self._token('Northsiders')
-            with self._option():
-                self._token('Steamers')
-            with self._option():
-                self._token('Spiders')
-            with self._option():
-                self._token('Explorers')
-            with self._option():
-                self._token('Clutch')
-            with self._option():
-                self._token('Toros')
-            with self._option():
-                self._token('Souterrains')
-            with self._option():
-                self._token('Cats')
-            with self._option():
-                self._token('Mudbugs')
-            with self._option():
-                self._token('Knights')
-            with self._option():
-                self._token('Admirals')
-            with self._option():
-                self._token('Clydesdales')
-            with self._option():
-                self._token('Stogies')
-            with self._option():
-                self._token('Federals')
-            self._error('expecting one of: Admirals Blues Cats Clutch Clydesdales Crackers Explorers Federals Knights Monarchs Mudbugs Northsiders Souterrains Spiders Steamers Stogies Toros')
+    def _phrase_(self):
+        self._pattern(r"[A-Za-z0-9\'\s\.\/]*")
 
     @graken()
     def _position_(self):
@@ -488,20 +375,6 @@ class GameReportParser(Parser):
             self._token(')')
 
     @graken()
-    def _annual_team_(self):
-        self._year_()
-        self.ast['year'] = self.last_node
-        self._city_()
-        self.ast['city'] = self.last_node
-        self._nickname_()
-        self.ast['nickname'] = self.last_node
-
-        self.ast._define(
-            ['year', 'city', 'nickname'],
-            []
-        )
-
-    @graken()
     def _boxscore_td_start_(self):
         self._token('<td valign="top">')
 
@@ -525,23 +398,11 @@ class GameReportParser(Parser):
     def _boxscore_matchup_(self):
         with self._optional():
             self._token('BOXSCORE:')
-        self._annual_team_()
-        self.ast['away'] = self.last_node
-        with self._group():
-            with self._choice():
-                with self._option():
-                    self._token('At')
-                with self._option():
-                    self._token('at')
-                self._error('expecting one of: At at')
-        self._annual_team_()
-        self.ast['home'] = self.last_node
-        with self._optional():
-            self._mdy_()
-            self.ast['date'] = self.last_node
+        self._phrase_()
+        self.ast['phrase'] = self.last_node
 
         self.ast._define(
-            ['away', 'home', 'date'],
+            ['phrase'],
             []
         )
 
@@ -570,7 +431,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_hitting_header_team_(self):
-        self._nickname_()
+        self._nickname_no_sep_()
         self.ast['nickname'] = self.last_node
 
         def block2():
@@ -885,7 +746,7 @@ class GameReportParser(Parser):
     def _boxscore_team_(self):
         self._token('<font color="#000000">')
 
-        self._nickname_()
+        self._nickname_no_sep_()
         self.ast['nickname'] = self.last_node
         self._pattern(r'\.*')
 
@@ -953,7 +814,7 @@ class GameReportParser(Parser):
     def _boxscore_pitching_header_team_(self):
         self._token('<font color="#FF0000">')
 
-        self._nickname_()
+        self._nickname_no_sep_()
         self.ast['nickname'] = self.last_node
         with self._optional():
             self._parenthesized_record_()
@@ -1227,7 +1088,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_team_count_colon_(self):
-        self._nickname_()
+        self._nickname_no_sep_()
         self.ast['nickname'] = self.last_node
         self._token(':')
         self._whole_number_()
@@ -1240,7 +1101,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _boxscore_team_basic_rate_(self):
-        self._nickname_()
+        self._nickname_no_sep_()
         self.ast['nickname'] = self.last_node
         self._token(':')
         self._whole_number_()
@@ -1568,15 +1429,12 @@ class GameReportParser(Parser):
     def _game_story_header_(self):
         self._token('<font color="#FF0000">')
 
-        self._city_caps_()
-        self.ast['away'] = self.last_node
-        self._token('AT')
-        self._city_caps_()
-        self.ast['home'] = self.last_node
+        self._phrase_()
+        self.ast['phrase'] = self.last_node
         self._token('</font>')
 
         self.ast._define(
-            ['away', 'home'],
+            ['phrase'],
             []
         )
 
@@ -1847,13 +1705,10 @@ class GameReportSemantics(object):
     def full_name_no_of(self, ast):
         return ast
 
-    def city(self, ast):
+    def nickname_no_sep(self, ast):
         return ast
 
-    def city_caps(self, ast):
-        return ast
-
-    def nickname(self, ast):
+    def phrase(self, ast):
         return ast
 
     def position(self, ast):
@@ -1920,9 +1775,6 @@ class GameReportSemantics(object):
         return ast
 
     def parenthesized_whole_ordinal(self, ast):
-        return ast
-
-    def annual_team(self, ast):
         return ast
 
     def boxscore_td_start(self, ast):
