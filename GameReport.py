@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2016, 1, 8, 6, 19, 3, 4)
+__version__ = (2016, 1, 9, 22, 50, 11, 5)
 
 __all__ = [
     'GameReportParser',
@@ -139,7 +139,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _nickname_no_sep_(self):
-        self._pattern(r"[A-Za-z0-9\']+(?=(\:|\.|\s+AB|\s+IP|\s+\())")
+        self._pattern(r"[A-Za-z0-9\'\s]+(?=(\:|\.|\s+AB|\s+IP|\())")
 
     @graken()
     def _phrase_(self):
@@ -430,32 +430,15 @@ class GameReportParser(Parser):
             self._error('expecting one of: AB AVG H R RBI')
 
     @graken()
-    def _boxscore_hitting_header_team_(self):
-        self._nickname_no_sep_()
-        self.ast['nickname'] = self.last_node
-
-        def block2():
-            self._boxscore_hitting_stat_label_()
-        self._closure(block2)
-        self.ast['headers'] = self.last_node
-
-        self.ast._define(
-            ['nickname', 'headers'],
-            []
-        )
-
-    @graken()
     def _boxscore_hitting_header_(self):
         self._token('<font color="#FF0000">')
 
-        self._boxscore_hitting_header_team_()
-        self.ast['away'] = self.last_node
-        self._boxscore_hitting_header_team_()
-        self.ast['home'] = self.last_node
+        self._phrase_()
+        self.ast['phrase'] = self.last_node
         self._token('</font>')
 
         self.ast._define(
-            ['away', 'home'],
+            ['phrase'],
             []
         )
 
@@ -1796,9 +1779,6 @@ class GameReportSemantics(object):
         return ast
 
     def boxscore_hitting_stat_label(self, ast):
-        return ast
-
-    def boxscore_hitting_header_team(self, ast):
         return ast
 
     def boxscore_hitting_header(self, ast):

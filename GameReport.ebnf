@@ -32,7 +32,7 @@ full_name_no_injured = ?/[A-Za-z\.\s\-\']+(?= INJURED)/? ;
 full_name_no_gem_event = ?/[A-Za-z\.\s\-\']+(?= (robbed|blocked|turns))/? ;
 full_name_no_of = ?/[A-Za-z\.\s\-\']+(?= of)/? ;
 
-nickname_no_sep = ?/[A-Za-z0-9\']+(?=(\:|\.|\s+AB|\s+IP|\s+\())/? ;
+nickname_no_sep = ?/[A-Za-z0-9\'\s]+(?=(\:|\.|\s+AB|\s+IP|\())/? ;
 
 phrase = ?/[A-Za-z0-9\'\s\.\/]*/? ;
 
@@ -135,16 +135,10 @@ boxscore_matchup_header =
 
 boxscore_hitting_stat_label = 'AB' | 'R' | 'H' | 'RBI' | 'AVG' ;
 
-boxscore_hitting_header_team =
-    nickname:nickname_no_sep
-    headers:{boxscore_hitting_stat_label}
-    ;
-
 (* <font color="#FF0000">  Northsiders        AB  R  H RBI AVG     Monarchs           AB  R  H RBI AVG</font> *)
 boxscore_hitting_header =
     >font_red
-    away:boxscore_hitting_header_team
-    home:boxscore_hitting_header_team
+    phrase:phrase
     >font_close
     ;
 

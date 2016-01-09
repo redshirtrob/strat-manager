@@ -47,18 +47,46 @@ NICKNAMES = [
     'Stogies',
 ]
 
-def main(filename, stash_directory=None, use_db=False, skip_clean=False):
+HOF_CITIES = [
+    'Mt. Washington',
+    'Mudville',
+    'Sirk City',
+    'Hackensack',
+    'Motor City',
+    'Cook County',
+    'Vegas',
+    'New Milan'
+]
+
+HOF_NICKNAMES = [
+    'Wonders',
+    'Grey Eagles',
+    'Spikes',
+    'Monuments',
+    'Bulls',
+    'Robber Barons',
+    'Sultans',
+    'Rajahs'
+]
+
+def main(filename, stash_directory=None, use_db=False, skip_clean=False, league='blb'):
     should_stash = stash_directory is not None
+
+    if league == 'blb':
+        cities = CITIES
+        nicknames = NICKNAMES
+    elif league == 'hof':
+        cities = HOF_CITIES
+        nicknames = HOF_NICKNAMES
     
     with open(filename, 'r') as f:
         html = f.read()
 
     report_type = get_report_type(html)
-    print "Report Type: {}".format(report_type)
     if report_type == REPORT_TYPE_LEAGUE_DAILY:
-        ast = parse_league_daily(html, cities=CITIES, nicknames=NICKNAMES)
+        ast = parse_league_daily(html, cities=cities, nicknames=nicknames)
     elif report_type == REPORT_TYPE_GAME_DAILY:
-        ast = parse_game_daily(html, cities=CITIES, nicknames=NICKNAMES)
+        ast = parse_game_daily(html, cities=cities, nicknames=nicknames)
     else:
         raise Exception("Invalid Type: {}".format(report_type))
 
@@ -101,7 +129,9 @@ if __name__ == '__main__':
                         help='don\'t clean the AST before writing')
     parser.add_argument('--use-db', action='store_true', default=False,
                         help='insert AST into a database')
+    parser.add_argument('--league', choices=['blb', 'hof'], default='blb',
+                        help='league the data belongs to')
     parser.add_argument('file', metavar="FILE", help="the input file to parse")
     args = parser.parse_args()
     
-    main(args.file, args.dir, args.use_db, args.skip_clean)
+    main(args.file, args.dir, args.use_db, args.skip_clean, args.league)

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from GameReport import GameReportParser
-from grako.exceptions import FailedToken
+from grako.exceptions import FailedParse
 from grako.ast import AST
 
 class GameReportSemanticActions(object):
@@ -75,9 +75,39 @@ class GameReportSemanticActions(object):
         self.validate_nickname(ast.nickname)
         return ast
 
-    def boxscore_hitting_header_team(self, ast):
-        self.validate_nickname(ast.nickname)
-        return ast
+    #   Northsiders        AB  R  H RBI AVG     Monarchs           AB  R  H RBI AVG
+    def boxscore_hitting_header(self, ast):
+        def headers(phrase, nickname):
+            return phrase[phrase.find(nickname)+len(nickname):].split()
+        
+        if ast.phrase is None:
+            raise Exception
+
+        phrase = ast.phrase.lower()
+
+        # Find the two team nickames and save the indexes
+        nickname_indexes = []
+        for nickname in self.nicknames:
+            if nickname in phrase:
+                nickname_indexes.append(phrase.find(nickname))
+
+        if len(nickname_indexes) != 2:
+            raise Exception
+        
+        # Break the string into home and away sides, away is first
+        nickname_indexes.sort()
+        away_string = phrase[nickname_indexes[0]:nickname_indexes[1]]
+        away_team = self.find_nickname(away_string)
+        away_headers = headers(away_string, away_team)
+        
+        home_string = phrase[nickname_indexes[1]:]
+        home_team = self.find_nickname(home_string)
+        home_headers = headers(home_string, home_team)
+
+        # Generate the AST
+        away_ast = AST(nickname=unicode(away_team), headers=[unicode(h) for h in away_headers])
+        home_ast = AST(nickname=unicode(home_team), headers=[unicode(h) for h in home_headers])
+        return AST(away=away_ast, home=home_ast)
 
     def boxscore_team(self, ast):
         self.validate_nickname(ast.nickname)
@@ -107,7 +137,7 @@ def parse_league_daily(html, cities=None, nicknames=None):
         try:
             stories_ast = parser.parse(table.prettify(), 'game_story_table')
             break
-        except FailedToken:
+        except FailedParse:
             pass
 
     boxscores_ast = None
@@ -115,7 +145,7 @@ def parse_league_daily(html, cities=None, nicknames=None):
         try:
             boxscores_ast = parser.parse(table.prettify(), 'boxscore_table')
             break
-        except FailedToken:
+        except FailedParse:
             pass
 
     if stories_ast is None or boxscores_ast is None:
