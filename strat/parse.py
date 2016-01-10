@@ -3,6 +3,14 @@ from GameReport import GameReportParser
 from grako.exceptions import FailedParse
 from grako.ast import AST
 
+PITCHING_RESULTS = (
+    'WIN', 'W',
+    'LOSS','L',
+    'HOLD', 'H',
+    'SAVE', 'S',
+    'BS', 'B'
+)
+
 class GameReportSemanticActions(object):
     def __init__(self, cities, nicknames):
         self.cities = [city.lower() for city in cities]
@@ -108,6 +116,38 @@ class GameReportSemanticActions(object):
         away_ast = AST(nickname=unicode(away_team), headers=[unicode(h) for h in away_headers])
         home_ast = AST(nickname=unicode(home_team), headers=[unicode(h) for h in home_headers])
         return AST(away=away_ast, home=home_ast)
+
+    # <font color="#000000">J.Lopez WIN(4-0) BS(1st)  1 1/3   1   0   0   1   0   0  24   2.96</font>
+    # <font color="#000000">E.Santana WIN BS          8 1/3   5   3   3   3   6   2 113  A1 D6</font>
+    def boxscore_pitching_stat_line(self, ast):
+        # parser handled the name/result string properly
+        if len(ast.result_stats) > 0:
+            return ast
+
+        result_stats = []
+        name_parts = ast.player_name.split()
+        for pr in PITCHING_RESULTS:
+            if pr in name_parts:
+                result_stats.append(unicode(pr))
+
+        # didn't find any results embedded in the `player_name`
+        if len(result_stats) == 0:
+            return ast
+
+        # filter out the matched results and restore the player name
+        name_parts = [np for np in name_parts if not np in result_stats]
+        player_name = u' '.join(name_parts)
+
+        # build the new ast with the computed `result_stats`
+        new_ast = AST(
+            ip=ast.ip,
+            statistics=ast.statistics,
+            player_name=player_name,
+            scoresheet=ast.scoresheet,
+            result_stats=result_stats
+        )
+
+        return new_ast
 
     def boxscore_team(self, ast):
         self.validate_nickname(ast.nickname)
