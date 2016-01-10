@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=./fg-data-files/fg-*.csv
+FILES=./fixtures/fg-*.csv
 
 for f in $FILES
 do
