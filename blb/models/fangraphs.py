@@ -55,7 +55,7 @@ class Player(Base):
     @property
     def fullname(self):
         return "{} {}".format(self.first_name, self.last_name)
-
+        
 
 class PlayerSeason(Base):
     """Relate player/season/team/stats

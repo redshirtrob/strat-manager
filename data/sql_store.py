@@ -33,16 +33,40 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
 
-        player_seasons = self.session.query(PlayerSeason).join(Season).filter(
-            Season.id == PlayerSeason.season_id
-        ).filter(
-            Season.year == year
+        player_seasons = self.session.query(PlayerSeason).join(Season).filter(and_(
+            Season.id == PlayerSeason.season_id,
+            Season.year == year)
         ).all()
 
         if player_seasons:
-            results = [ps.player for ps in player_seasons]
-            players = [r.to_dict() for r in results]
+            players = []
+            for ps in player_seasons:
+                player = ps.player.to_dict()
+                if ps.batting is not None:
+                    player['batting'] = [ps.batting.to_dict()]
+                if ps.pitching is not None:
+                    player['pitching'] = [ps.pitching.to_dict()]
+                players.append(player)
             raise gen.Return(players)
+
+    @gen.coroutine
+    def get_player(self, player_id=None, year=None):
+        if player_id is None:
+            raise InvalidPlayerException("You must specify a player")
+
+        player_seasons = self.session.query(PlayerSeason).filter(PlayerSeason.player_id == player_id)
+        if year is not None:
+            player_seasons = player_seasons.join(Season).filter(and_(
+                PlayerSeason.season_id == Season.id,
+                Season.year == year)
+            )
+        player_seasons = player_seasons.all()
+
+        if len(player_seasons) > 0:
+            player = player_seasons[0].player.to_dict()
+            player['batting'] = [ps.batting.to_dict() for ps in player_seasons if ps.batting is not None]
+            player['pitching'] = [ps.pitching.to_dict() for ps in player_seasons if ps.pitching is not None]
+            raise gen.Return(player)
 
     @gen.coroutine
     def get_batting_by_year(self, year=None):
@@ -52,7 +76,9 @@ class SQLStore(object):
             raise InvalidYearException("You must specify a year")
         
         results = session.query(Batting).join(PlayerSeason).join(Season).filter(and_(
-            Batting.player_season_id == PlayerSeason.id, Season.year == year)
+            Batting.player_season_id == PlayerSeason.id,
+            PlayerSeason.season_id == Season.id,
+            Season.year == year)
         ).all()
 
         if results:
