@@ -4,7 +4,6 @@ from sqlalchemy import Column, Float, Integer, String
 
 from blb.models.core import Base
 
-
 fg_player_season_teams = Table('fg_player_season_teams', Base.metadata,
                                Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
                                Column('fg_team_id', ForeignKey('fg_team.id'), primary_key=True))
@@ -38,7 +37,7 @@ class Season(Base):
 
     def __repr__(self):
         return "<Season({})>".format(self.year)
-    
+
     
 class Player(Base):
     """Players in the Fangraphs database"""
@@ -146,7 +145,14 @@ class Batting(Base):
             self.player_season.player.fullname,
             self.player_season.season.year
         )
-    
+
+    def to_dict(self):
+        dct = super(Batting, self).to_dict()
+        dct['player_id'] = self.player_season.player.id
+        dct['last_name'] = self.player_season.player.last_name
+        dct['first_name'] = self.player_season.player.first_name
+        dct['season'] = self.player_season.season.year
+        return dct
     
 # "Name","Team","W","L","SV","G","GS","IP","K/9","BB/9","HR/9","BABIP","LOB%","GB%","HR/FB",
 # "ERA","FIP","xFIP","WAR","CG","H","R","ER","HR","BB","IBB","HBP","WP","BK","SO","GB","FB",
@@ -197,3 +203,10 @@ class Pitching(Base):
             self.player_season.season.year
         )
     
+    def to_dict(self):
+        dct = super(Pitching, self).to_dict()
+        dct['player_id'] = self.player_season.player.id
+        dct['last_name'] = self.player_season.player.last_name
+        dct['first_name'] = self.player_season.player.first_name
+        dct['season'] = self.player_season.season.year
+        return dct

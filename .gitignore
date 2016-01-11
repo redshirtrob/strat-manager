@@ -23,3 +23,5 @@ data-files/*
 raw-asts/*
 fg-data-files/*
 *.db
+.cache/*
+tests/.cache/*
