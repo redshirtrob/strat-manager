@@ -100,7 +100,7 @@ $ pip install -r requirements.txt
 Launch iPython and load the query file
 ```bash
 $ ipython
-$ %load sql-bootstrap.py
+In [1]: %load sql-bootstrap.py
 ```
 
 Get all `PlayerSeason` records for a Player with `id` = 1
@@ -128,6 +128,6 @@ In [21]: %load store-bootstrap.py
 
 Query the Store
 ```python
-In[21]: players = store.get_players_by_year('2009')
+In [21]: players = store.get_players_by_year('2009')
 In [21]: p = players.result() # resolve Future
 ```
