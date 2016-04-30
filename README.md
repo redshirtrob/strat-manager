@@ -69,7 +69,7 @@ database.  It uses a sqlite database for now, called `blb.sqlite`.
 Generate a table of baseball teams.  This table is a prerequisite for
 the Fangraphs importer, found below.
 ```bash
-$ ./mlb-importer.py ./data/mlb.csv
+$ ./mlb-importer.py ./fixtures/mlb.csv
 ```
 
 ### Fangraphs Importer
@@ -81,6 +81,11 @@ I found most interesting.
 ```bash
 $ ./fg-importer.py ./fixtures/fg-batting-2008.csv
 $ ./fg-importer.py ./fixtures/fg-pitching-2008.csv
+```
+
+Or, import all Fangraph's data with:
+```bash
+$ ./import-fangraphs.sh
 ```
 
 ### Working with the Database
@@ -100,16 +105,16 @@ $ %load sql-bootstrap.py
 
 Get all `PlayerSeason` records for a Player with `id` = 1
 ```python
-In [5]: player_seasons = session.query(PlayerSeason).filter(PlayerSeason.player_id == 1)
+In [5]: player_seasons = session.query(FGPlayerSeason).filter(FGPlayerSeason.player_id == 1)
 In [7]: for ps in player_seasons:
   ...:     print ps
     ...:
-    PlayerSeason(Player=Alfredo Amezaga, Season=2008)>
-    PlayerSeason(Player=Alfredo Amezaga, Season=2009)>
-    PlayerSeason(Player=Alfredo Amezaga, Season=2011)>
+    FGPlayerSeason(FGPlayer=Alfredo Amezaga, Season=2008)>
+    FGPlayerSeason(FGPlayer=Alfredo Amezaga, Season=2009)>
+    FGPlayerSeason(FGPlayer=Alfredo Amezaga, Season=2011)>
 ```
 
-### Working with the REST Service (without running a server)
+### Working with the SQL Store API
 
 Launch iPython
 ```bash
@@ -118,11 +123,10 @@ $ ipython
 
 Prepare Store
 ```python
-In [21]: from data.sql_store import SQLStore
-In [21]: store = SQLStore()
+In [21]: %load store-bootstrap.py
 ```
 
-Query Endpoint
+Query the Store
 ```python
 In[21]: players = store.get_players_by_year('2009')
 In [21]: p = players.result() # resolve Future

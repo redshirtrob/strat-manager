@@ -4,7 +4,7 @@ from sqlalchemy import Column, Float, Integer, String
 
 from blb.models.core import Base
 
-class League(Base):
+class BLBLeague(Base):
     """BLB Leagues"""
     __tablename__ = 'blb_league'
 
@@ -13,7 +13,7 @@ class League(Base):
     abbreviation = Column(String(10))
 
 
-class Season(Base):
+class BLBSeason(Base):
     """BLB Seasons"""
     __tablename__ = 'blb_season'
 
@@ -21,22 +21,22 @@ class Season(Base):
     year = Column(String(4))
     name = Column(String(50))
 
-    # One League to many Seasons
-    league = relationship('League', back_populates='seasons')
+    # One BLBLeague to many Seasons
+    league = relationship('BLBLeague', back_populates='seasons')
 
 
-class Division(Base):
+class BLBDivision(Base):
     """BLB Divisions"""
     __tablename__ = 'blb_division'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
 
-    # One Season to many Divisions
-    season = relationship('Season', back_populates='divisions')
+    # One BLBSeason to many Divisions
+    season = relationship('BLBSeason', back_populates='divisions')
 
 
-class Team(Base):
+class BLBTeam(Base):
     """BLB Teams"""
     __tablename__ = 'blb_team'
 
@@ -48,9 +48,9 @@ class Team(Base):
     # Maps to authenticated account
     account = Column(String(32), nullable=True)
 
-    # One Division to many Teams
-    division = relationship('Division', back_populates='teams')
+    # One BLBDivision to many Teams
+    division = relationship('BLBDivision', back_populates='teams')
 
-    # One Season to many Teams
-    season = relationship('Season', back_populates='teams')
+    # One BLBSeason to many Teams
+    season = relationship('BLBSeason', back_populates='teams')
     

@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Float, Integer, String
 
-from blb.models.core import Base
+from .core import Base
 
 fg_player_season_teams = Table('fg_player_season_teams', Base.metadata,
                                Column('player_season_id', ForeignKey('fg_player_season.id'), primary_key=True),
