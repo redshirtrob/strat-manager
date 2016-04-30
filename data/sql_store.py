@@ -3,8 +3,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
 from tornado import gen
 
-from blb.models.fangraphs import (Season, Player, 
-    PlayerSeason, Batting, Pitching, Team)
+from blb.models.fangraphs import (FGSeason, FGPlayer, 
+    FGPlayerSeason, FGBatting, FGPitching, FGTeam)
 
 from .exceptions import (InvalidPlayerException, InvalidYearException)
 
@@ -21,7 +21,7 @@ class SQLStore(object):
     def get_seasons(self):
         """Get a list of all seasons"""
         
-        results = self.session.query(Season).all()
+        results = self.session.query(FGSeason).all()
         if results:
             seasons = [s.to_dict() for s in results]
             raise gen.Return(seasons)
@@ -33,9 +33,9 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
 
-        player_seasons = self.session.query(PlayerSeason).join(Season).filter(and_(
-            Season.id == PlayerSeason.season_id,
-            Season.year == year)
+        player_seasons = self.session.query(FGPlayerSeason).join(FGSeason).filter(and_(
+            FGSeason.id == FGPlayerSeason.season_id,
+            FGSeason.year == year)
         ).all()
 
         if player_seasons:
@@ -54,11 +54,11 @@ class SQLStore(object):
         if player_id is None:
             raise InvalidPlayerException("You must specify a player")
 
-        player_seasons = self.session.query(PlayerSeason).filter(PlayerSeason.player_id == player_id)
+        player_seasons = self.session.query(FGPlayerSeason).filter(FGPlayerSeason.player_id == player_id)
         if year is not None:
-            player_seasons = player_seasons.join(Season).filter(and_(
-                PlayerSeason.season_id == Season.id,
-                Season.year == year)
+            player_seasons = player_seasons.join(FGSeason).filter(and_(
+                FGPlayerSeason.season_id == FGSeason.id,
+                FGSeason.year == year)
             )
         player_seasons = player_seasons.all()
 
@@ -75,10 +75,10 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
         
-        results = session.query(Batting).join(PlayerSeason).join(Season).filter(and_(
-            Batting.player_season_id == PlayerSeason.id,
-            PlayerSeason.season_id == Season.id,
-            Season.year == year)
+        results = session.query(FGBatting).join(FGPlayerSeason).join(FGSeason).filter(and_(
+            FGBatting.player_season_id == FGPlayerSeason.id,
+            FGPlayerSeason.season_id == FGSeason.id,
+            FGSeason.year == year)
         ).all()
 
         if results:
@@ -92,8 +92,8 @@ class SQLStore(object):
         if player_id is None:
             raise InvalidPlayerException("You must specify a player")
             
-        results = self.session.query(Batting).join(PlayerSeason).join(Player).filter(and_(
-            Batting.player_season_id == PlayerSeason.id, Player.id == player_id
+        results = self.session.query(FGBatting).join(FGPlayerSeason).join(FGPlayer).filter(and_(
+            FGBatting.player_season_id == FGPlayerSeason.id, FGPlayer.id == player_id
         )).all()
 
         if results:
@@ -107,8 +107,8 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
         
-        results = session.query(Pitching).join(PlayerSeason).join(Season).filter(and_(
-            Pitching.player_season_id == PlayerSeason.id, Season.year == year)
+        results = session.query(FGPitching).join(FGPlayerSeason).join(FGSeason).filter(and_(
+            FGPitching.player_season_id == FGPlayerSeason.id, FGSeason.year == year)
         ).all()
 
         if results:
@@ -122,8 +122,8 @@ class SQLStore(object):
         if player_id is None:
             raise InvalidPlayerException("You must specify a player")
             
-        results = self.session.query(Pitching).join(PlayerSeason).join(Player).filter(and_(
-            Pitching.player_season_id == PlayerSeason.id, Player.id == player_id
+        results = self.session.query(FGPitching).join(FGPlayerSeason).join(FGPlayer).filter(and_(
+            FGPitching.player_season_id == FGPlayerSeason.id, FGPlayer.id == player_id
         )).all()
 
         if results:

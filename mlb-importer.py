@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from blb.models.core import Base
-from blb.models.fangraphs import Team
+from blb.models.fangraphs import FGTeam
 
 Session = sessionmaker()
 
@@ -22,7 +22,7 @@ def main(data_file):
         for line in lines[1:]:
             values = [value.strip() for value in line.split(',')]
             kwargs = dict(zip(keys, values))
-            team = Team(**kwargs)
+            team = FGTeam(**kwargs)
             session.add(team)
             count += 1
     session.commit()

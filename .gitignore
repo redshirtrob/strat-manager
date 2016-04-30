@@ -25,3 +25,5 @@ fg-data-files/*
 *.db
 .cache/*
 tests/.cache/*
+
+.ropeproject/*

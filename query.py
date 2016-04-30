@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 
-from blb.models.fangraphs import Season, Player, \
-    PlayerSeason, Batting, Team
+from blb.models.fangraphs import FGSeason, FGPlayer, \
+    FGPlayerSeason, FGBatting, FGTeam
 
 Session = sessionmaker()
 engine = create_engine('sqlite:///blb.db')

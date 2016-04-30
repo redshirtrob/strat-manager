@@ -5,8 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
 
 from blb.models.core import Base
-from blb.models.fangraphs import Season, Player, \
-    PlayerSeason, Batting, Pitching, Team
+from blb.models.fangraphs import FGSeason, FGPlayer, \
+    FGPlayerSeason, FGBatting, FGPitching, FGTeam
 
 from blb.models.util import FG_BATTING_TO_DB,\
     FG_PITCHING_TO_DB, clean_value, clean_key
@@ -20,17 +20,17 @@ def main(file_type, year, data_file):
     
     Base.metadata.create_all(ENGINE)
 
-    season = session.query(Season).filter(Season.year == year).one_or_none()
+    season = session.query(FGSeason).filter(FGSeason.year == year).one_or_none()
     if season is None:
-        season = Season(year=year)
+        season = FGSeason(year=year)
         session.add(season)
 
     if file_type == 'batting':
         key_map = FG_BATTING_TO_DB
-        StatsClass = Batting
+        StatsClass = FGBatting
     else:
         key_map = FG_PITCHING_TO_DB
-        StatsClass = Pitching
+        StatsClass = FGPitching
 
     count = 0
     with open(data_file, 'r') as f:
@@ -41,19 +41,19 @@ def main(file_type, year, data_file):
 
             # Determine if the player exists
             player_id = values[-1].strip()
-            player = session.query(Player).filter(Player.id == player_id).one_or_none()
+            player = session.query(FGPlayer).filter(FGPlayer.id == player_id).one_or_none()
             if player is None:
                 first_name, last_name = [clean_value(name) for name in values[0].split(' ', 1)]
-                player = Player(id=player_id, last_name=last_name, first_name=first_name)
+                player = FGPlayer(id=player_id, last_name=last_name, first_name=first_name)
                 session.add(player)
 
             # Determine if player exists for this season
-            player_season = session.query(PlayerSeason).\
-                            filter(and_(PlayerSeason.player_id == player.id,
-                                        PlayerSeason.season_id == season.id)).one_or_none()
+            player_season = session.query(FGPlayerSeason).\
+                            filter(and_(FGPlayerSeason.player_id == player.id,
+                                        FGPlayerSeason.season_id == season.id)).one_or_none()
             if player_season is None:
-                player_season = PlayerSeason(player_id=player.id, season_id=season.id)
-                team = session.query(Team).filter(Team.nickname == values[1]).first()
+                player_season = FGPlayerSeason(player_id=player.id, season_id=season.id)
+                team = session.query(FGTeam).filter(FGTeam.nickname == values[1]).first()
                 if team is not None:
                     if player_season.teams is None:
                         player_seasons = [team]
