@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Float, Integer, String
 
-from blb.models.core import Base
+from .core import Base
 
 class BLBLeague(Base):
     """BLB Leagues"""
@@ -12,6 +12,12 @@ class BLBLeague(Base):
     name = Column(String(200))
     abbreviation = Column(String(10))
 
+    # Many BLBSeasons to One BLBLeague
+    seasons = relationship('BLBSeason', back_populates='league')
+
+    def __repr__(self):
+        return "<BLBLeague({} {})>".format(self.name, self.abbreviation)
+
 
 class BLBSeason(Base):
     """BLB Seasons"""
@@ -19,11 +25,23 @@ class BLBSeason(Base):
 
     id = Column(Integer, primary_key=True)
     year = Column(String(4))
-    name = Column(String(50))
+    name = Column(String(50), nullable=True)
 
-    # One BLBLeague to many Seasons
+    # One BLBLeague to Many BLBSeasons
+    league_id = Column(Integer, ForeignKey('blb_league.id'))
     league = relationship('BLBLeague', back_populates='seasons')
 
+    # Many BLBDivisions to One BLBSeason
+    divisions = relationship('BLBDivision', back_populates='season')
+
+    # Many BLBTeams to One BLBSeason
+    teams = relationship('BLBTeam', back_populates='season')
+
+    def __repr__(self):
+        if self.name is not None:
+            return "<BLBSeason({} {})>".format(self.year, self.name)
+        else:
+            return "<BLBSeason({})>".format(self.year)
 
 class BLBDivision(Base):
     """BLB Divisions"""
@@ -32,9 +50,16 @@ class BLBDivision(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
 
-    # One BLBSeason to many Divisions
+    # One BLBSeason to Many BLBDivisions
+    season_id = Column(Integer, ForeignKey('blb_season.id'))
     season = relationship('BLBSeason', back_populates='divisions')
 
+    # Many BLBTeams to One BLBDivision
+    teams = relationship('BLBTeam', back_populates='division')
+
+    def __repr__(self):
+        return "<BLBDivision({})>".format(self.name)
+    
 
 class BLBTeam(Base):
     """BLB Teams"""
@@ -48,9 +73,13 @@ class BLBTeam(Base):
     # Maps to authenticated account
     account = Column(String(32), nullable=True)
 
-    # One BLBDivision to many Teams
+    # One BLBDivision to Many BLBTeams
+    division_id = Column(Integer, ForeignKey('blb_division.id'))
     division = relationship('BLBDivision', back_populates='teams')
 
-    # One BLBSeason to many Teams
+    # One BLBSeason to Many BLBTeams
+    season_id = Column(Integer, ForeignKey('blb_season.id'))
     season = relationship('BLBSeason', back_populates='teams')
     
+    def __repr__(self):
+        return "<BLBTeam({} {})>".format(self.location, self.nickname)
