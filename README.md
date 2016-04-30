@@ -62,7 +62,7 @@ You can also insert the AST into a MongoDB database with the
 # Importers
 
 This is a series of scripts to import team and statistical data into a
-database.
+database.  It uses a sqlite database for now, called `blb.sqlite`.
 
 ### Team Importer
 
@@ -79,7 +79,51 @@ Import a CSV from [Fangraphs](http://www.fangraphs.com).  See the
 statistical categories.  It's easy to add more, but these are the ones
 I found most interesting.
 ```bash
-$ ./fg-importer.py ./fg.csv
+$ ./fg-importer.py ./fixtures/fg-batting-2008.csv
+$ ./fg-importer.py ./fixtures/fg-pitching-2008.csv
 ```
 
+### Working with the Database
 
+Create the virtual environment
+```bash
+$ mkvirtualenv strat-manager
+$ workon strat-manager
+$ pip install -r requirements.txt
+```
+
+Launch iPython and load the query file
+```bash
+$ ipython
+$ %load sql-bootstrap.py
+```
+
+Get all `PlayerSeason` records for a Player with `id` = 1
+```python
+In [5]: player_seasons = session.query(PlayerSeason).filter(PlayerSeason.player_id == 1)
+In [7]: for ps in player_seasons:
+  ...:     print ps
+    ...:
+    PlayerSeason(Player=Alfredo Amezaga, Season=2008)>
+    PlayerSeason(Player=Alfredo Amezaga, Season=2009)>
+    PlayerSeason(Player=Alfredo Amezaga, Season=2011)>
+```
+
+### Working with the REST Service (without running a server)
+
+Launch iPython
+```bash
+$ ipython
+```
+
+Prepare Store
+```python
+In [21]: from data.sql_store import SQLStore
+In [21]: store = SQLStore()
+```
+
+Query Endpoint
+```python
+In[21]: players = store.get_players_by_year('2009')
+In [21]: p = players.result() # resolve Future
+```
