@@ -62,7 +62,7 @@ You can also insert the AST into a MongoDB database with the
 # Importers
 
 This is a series of scripts to import team and statistical data into a
-database.  It uses a sqlite database for now, called `blb.sqlite`.
+database.  It uses a sqlite database for now, called `blb.db`.
 
 ### Team Importer
 
@@ -130,4 +130,9 @@ Query the Store
 ```python
 In [21]: players = store.get_players_by_year('2009')
 In [21]: p = players.result() # resolve Future
+```
+
+### Running the HTTP Server
+```bash
+$ PYTHONPATH=./ python web/server.py
 ```

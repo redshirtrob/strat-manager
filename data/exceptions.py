@@ -5,4 +5,8 @@ class InvalidYearException(Exception):
 class InvalidPlayerException(Exception):
     def __init__(self, message):
         super(InvalidPlayerException, self).__init__(message)
+
+class InvalidLeagueException(Exception):
+    def __init__(self, message):
+        super(InvalidPlayerException, self).__init__(message)
         

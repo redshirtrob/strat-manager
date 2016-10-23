@@ -3,7 +3,11 @@ import tornado.web
 from tornado import gen
 
 from data.sql_store import SQLStore
-from data.exceptions import (InvalidPlayerException, InvalidYearException)
+from data.exceptions import (
+    InvalidLeagueException,
+    InvalidPlayerException,
+    InvalidYearException
+)
 
 class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -16,7 +20,115 @@ class BaseHandler(tornado.web.RequestHandler):
         self.write(json.dumps(data))
         self.finish()
 
-class PlayersHandler(BaseHandler):
+
+class BLBLeagueHandler(BaseHandler):
+
+    SUPPORTED_METHODS = ('GET', 'POST')
+
+    @gen.coroutine
+    def get(self, league_id=None):
+        leagues = None
+        try:
+            if league_id is None:
+                leagues = yield self.application.store.get_blb_leagues()
+            else:
+                league = yield self.application.store.get_blb_league(league_id)
+                if league is not None:
+                    leagues = [league]
+        except InvalidLeagueException:
+            pass
+        
+        self.write(json.dumps(leagues))
+        self.finish()
+
+    @gen.coroutine
+    def post(self):
+        self.application.store.create_blb_league(json.loads(self.request.body))
+        self.finish()
+
+
+class BLBSeasonHandler(BaseHandler):
+    
+    SUPPORTED_METHODS = ('GET', 'POST')
+
+    @gen.coroutine
+    def get(self, season_id=None):
+        league_id = self.get_argument('league_id', None)
+        seasons = []
+        if season_id is not None:
+            result = yield self.application.store.get_blb_season_by_season_id(season_id)
+            if result is not None:
+                seasons = [result]
+        elif league_id is not None:
+            seasons = yield self.application.store.get_blb_seasons_by_league_id(league_id)
+        self.write(json.dumps(seasons))
+        self.finish()
+
+    @gen.coroutine
+    def post(self):
+        self.application.store.create_blb_season(json.loads(self.request.body))
+        self.finish()
+
+
+class BLBTeamHandler(BaseHandler):
+
+    SUPPORTED_METHODS = ('GET', 'POST')
+
+    @gen.coroutine
+    def get(self, team_id=None):
+        division_id = self.get_argument('division_id', None)
+        season_id = self.get_argument('season_id', None)
+        teams = []
+        if team_id is not None:
+            result = yield self.application.store.get_blb_team_by_team_id(team_id)
+            if result is not None:
+                teams = [result]
+        elif division_id is not None:
+            teams = yield self.application.store.get_blb_teams_by_division_id(division_id)
+        elif season_id is not None:
+            teams = yield self.application.store.get_blb_teams_by_season_id(season_id)
+        self.write(json.dumps(teams))
+        self.finish()
+
+    @gen.coroutine
+    def post(self):
+        self.application.store.create_blb_team(json.loads(self.request.body))
+        self.finish()
+
+
+class BLBDivisionHandler(BaseHandler):
+
+    SUPPORTED_METHODS = ('GET', 'POST')
+
+    @gen.coroutine
+    def get(self, division_id=None):
+        season_id = self.get_argument('season_id', None)
+        divisions = []
+        if division_id is not None:
+            result = yield self.application.store.get_blb_division_by_division_id(division_id)
+            if result is not None:
+                divisions = [result]
+        elif season_id is not None:
+            divisions = yield self.application.store.get_blb_division_by_season_id(season_id)
+        self.write(json.dumps(divisions))
+        self.finish()
+
+    @gen.coroutine
+    def post(self):
+        self.application.store.create_blb_division(json.loads(self.request.body))
+        self.finish()
+
+class FGSeasonsHandler(BaseHandler):
+
+    SUPPORTED_METHODS = ('GET')
+
+    @gen.coroutine
+    def get(self):
+        seasons = yield self.application.store.get_fg_seasons()
+        self.write(json.dumps(seasons))
+        self.finish()
+
+class FGPlayersHandler(BaseHandler):
 
     SUPPORTED_METHODS = ('GET')
     
@@ -27,9 +139,9 @@ class PlayersHandler(BaseHandler):
         players = None
         try:
             if player_id is None:
-                players = yield self.application.store.get_players_by_year(year)
+                players = yield self.application.store.get_fg_players_by_year(year)
             else:
-                player = yield self.application.store.get_player(player_id, year)
+                player = yield self.application.store.get_fg_player(player_id, year)
                 if player is not None:
                     players = [player]
         except InvalidPlayerException:
@@ -45,7 +157,7 @@ class PlayersHandler(BaseHandler):
         self.finish()
 
         
-class BattingHandler(BaseHandler):
+class FGBattingHandler(BaseHandler):
 
     SUPPORTED_METHODS = ('GET')
 
@@ -55,9 +167,9 @@ class BattingHandler(BaseHandler):
 
         try:
             if player_id is None:
-                batting = yield self.application.store.get_batting_by_year(year)
+                batting = yield self.application.store.get_fg_batting_by_year(year)
             else:
-                batting = yield self.application.store.get_batting_by_player(player_id)
+                batting = yield self.application.store.get_fg_batting_by_player(player_id)
                 if year is not None:
                     batting = [b for b in batting if b['season'] == year]
         except InvalidPlayerException:
@@ -73,13 +185,13 @@ class BattingHandler(BaseHandler):
         self.finish
 
 
-class PitchingHandler(BaseHandler):
+class FGPitchingHandler(BaseHandler):
 
     SUPPORTED_METHODS = ('GET')
 
     @gen.coroutine
     def get(self, year):
-        pitching = yield self.application.store.get_pitching_by_year(year)
+        pitching = yield self.application.store.get_fg_pitching_by_year(year)
         if pitching is None:
             self.send_error(404, msg='Not Found')
             raise gen.Return()

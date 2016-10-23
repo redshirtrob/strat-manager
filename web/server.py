@@ -2,17 +2,37 @@ import tornado.ioloop
 import tornado.web
 
 from data.sql_store import SQLStore
-from web.handlers import (PlayersHandler, BattingHandler, PitchingHandler)
+from web.handlers import (
+    BLBDivisionHandler,
+    BLBLeagueHandler,
+    BLBSeasonHandler,
+    BLBTeamHandler,
+    FGPlayersHandler,
+    FGBattingHandler,
+    FGPitchingHandler,
+    FGSeasonsHandler
+)
 
 PORT=9191
 
 class TornadoApp(tornado.web.Application):
     def __init__(self):
         routes = [
-            (r'/mlb/players/[/]?', PlayersHandler),
-            (r'/mlb/players/(\d*)[/]?', PlayersHandler),
-            (r'/mlb/batting/(\d*)[/]?', BattingHandler),
-            (r'/mlb/pitching/(\d*)[/]?', PitchingHandler)
+            # BLB API
+            (r'/blb/divisions[/]?', BLBDivisionHandler),
+            (r'/blb/divisions/(\d*)[/]?', BLBDivisionHandler),
+            (r'/blb/leagues[/]?', BLBLeagueHandler),
+            (r'/blb/seasons[/]?', BLBSeasonHandler),
+            (r'/blb/seasons/(\d*)[/]?', BLBSeasonHandler),
+            (r'/blb/teams[/]?', BLBTeamHandler),
+            (r'/blb/teams/(\d*)/?', BLBTeamHandler),
+
+            # Fangraphs API
+            (r'/fg/players[/]?', FGPlayersHandler),
+            (r'/fg/players/(\d*)[/]?', FGPlayersHandler),
+            (r'/fg/batting/(\d*)[/]?', FGBattingHandler),
+            (r'/fg/pitching/(\d*)[/]?', FGPitchingHandler),
+            (r'/fg/seasons[/]?', FGSeasonsHandler)
         ]
         settings = { 'debug': True }
         tornado.web.Application.__init__(self, routes, **settings)
