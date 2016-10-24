@@ -7,10 +7,10 @@ function requestLeagues() {
   };
 }
 
-function receiveLeagues(leagues) {
+function receiveLeagues(json) {
   return {
     type: types.RECEIVE_LEAGUES,
-    leagues,
+    leagues: json,
     receivedAt: Date.now()
   };
 }

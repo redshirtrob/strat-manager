@@ -1,22 +1,37 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {Button, Jumbotron} from 'react-bootstrap';
+import {Table} from 'react-bootstrap';
+import LeagueSummaryRow from './LeagueSummaryRow';
 
 class LeaguesOverview extends Component {
   render () {
+    const leagueRows =this.props.leagues.map((league, index) => (
+      <LeagueSummaryRow key={index} number={index+1} league={league} />
+    ));
+
     return (
-      <Jumbotron>
-        <h1>Hello, Leagues!</h1>
-        <p>This is a placeholder for the leagues overview</p>
-        <p><Button bsStyle="primary">Learn more</Button></p>
-      </Jumbotron>
+      <Table responsive striped hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>League Name</th>
+            <th>Abbreviation</th>
+            <th>Seasons</th>
+            <th>Commissioner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leagueRows}
+        </tbody>
+      </Table>
     )
   }
 }
 
 function mapStateToProps(state) {
   return {
+    leagues: state.leagues.leagues
   };
 }
 
