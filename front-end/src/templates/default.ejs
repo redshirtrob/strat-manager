@@ -44,10 +44,6 @@
 <% } %>
 <% } %>
 
-<div id="partial">
-<%= require('./partial.ejs')({webpackConfig: webpackConfig}) %>
-</div>
-
 <% if (htmlWebpackPlugin.options.window) { %>
 <script>
   <% for (var varName in htmlWebpackPlugin.options.window) { %>

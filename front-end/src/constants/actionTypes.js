@@ -1,2 +1,2 @@
-export const INCREMENT = 'INCREMENT';
-export const DECREMENT = 'DECREMENT';
+export const REQUEST_LEAGUES = "REQUEST_LEAGUES";
+export const RECEIVE_LEAGUES = "RECEIVE_LEAGUES";

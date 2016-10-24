@@ -11,6 +11,7 @@ from data.exceptions import (
 
 class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Content-type', 'application/json')
 
     def write_error(self, status_code, **kwargs):

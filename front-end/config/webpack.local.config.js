@@ -9,6 +9,10 @@ module.exports = (opts) => {
 
   return {
     ...config,
+    devServer: {
+      port: 3000,
+      historyApiFallback: true
+    },
     plugins: [
       ...config.plugins,
       new ForceCaseSensitivityPlugin(),  // OSX wont check but other unix os will

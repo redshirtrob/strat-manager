@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, browserHistory} from 'react-router';
@@ -6,6 +8,7 @@ import {Provider} from 'react-redux';
 import routes from './routes';
 import configureStore from './store/configureStore';
 import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
+import {fetchLeagues} from './actions/leaguesActions';
 
 
 const
@@ -15,7 +18,6 @@ const
 let ProjectElement;
 
 if (process.env.NODE_ENV !== 'production') {
-
   // development
   const DevTools = window.devToolsExtension
     ? () => null
@@ -27,12 +29,9 @@ if (process.env.NODE_ENV !== 'production') {
       <DevTools />
     </div>
   );
-
 } else {
-
   // production
   ProjectElement = <Router history={browserHistory} routes={routes} />;
-
 }
 
 // handle client side rendering
@@ -45,3 +44,5 @@ if (typeof document !== 'undefined') {
     document.getElementById(ROOT_ELEMENT)
   );
 }
+
+STORE.dispatch(fetchLeagues());

@@ -1,6 +1,7 @@
 import {createStore, applyMiddleware, compose} from 'redux';
 import rootReducer from 'reducers';
 import {persistState} from 'redux-devtools';
+import ReduxThunk from 'redux-thunk';
 
 
 export default function configureStore(initialState) {
@@ -8,6 +9,7 @@ export default function configureStore(initialState) {
   let enhancer;
   // add project middleware here
   let middlewares = [
+    ReduxThunk
   ];
   let middleware = applyMiddleware();
 

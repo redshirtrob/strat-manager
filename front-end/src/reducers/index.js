@@ -1,10 +1,11 @@
 import {combineReducers} from 'redux';
+
 // import all app reducers
-import counter from './counter';
+import leagues from './leagues';
 
 
 const rootReducer = combineReducers({
-  counter,
+  leagues,
 });
 
 export default rootReducer;
