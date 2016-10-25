@@ -1,2 +1,3 @@
 export const REQUEST_LEAGUES = "REQUEST_LEAGUES";
 export const RECEIVE_LEAGUES = "RECEIVE_LEAGUES";
+export const ADD_LEAGUE = "ADD_LEAGUE";

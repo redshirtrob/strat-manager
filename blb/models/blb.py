@@ -19,6 +19,10 @@ class BLBLeague(Base):
     def __repr__(self):
         return "<BLBLeague({} {})>".format(self.name, self.abbreviation)
 
+    @classmethod
+    def from_dict(cls, dct):
+        return cls(name=dct['name'], abbreviation=dct['abbreviation'])
+    
     def to_dict(self):
         dct = super(BLBLeague, self).to_dict()
         dct['name'] = self.name

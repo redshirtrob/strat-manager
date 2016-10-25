@@ -1,30 +1,44 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {Table} from 'react-bootstrap';
-import LeagueSummaryRow from './LeagueSummaryRow';
+import {Button, Col, Panel, Row} from 'react-bootstrap';
+import LeaguesSummary from './LeaguesSummary';
+import AddLeague from './AddLeague';
+import {createLeague} from '../actions/leaguesActions';
 
 class LeaguesOverview extends Component {
-  render () {
-    const leagueRows =this.props.leagues.map((league, index) => (
-      <LeagueSummaryRow key={index} number={index+1} league={league} />
-    ));
+  constructor() {
+    super();
+    this.state = {
+      addingNewLeague: false
+    };
+  }
+  
+  onClick() {
+    this.setState({
+      addingNewLeague: true
+    });
+    console.log("onClick");
+  }
 
+  render() {
+    let bottom;
+    if (this.state.addingNewLeague === true) {
+      bottom = (
+        <AddLeague onAddLeagueClick={this.props.onAddLeagueClick.bind(this)} />
+      );
+    } else {
+      bottom = (
+        <Button bsStyle="primary" bsSize="small" onClick={this.onClick.bind(this)}>Add League</Button>
+      );
+    }
     return (
-      <Table responsive striped hover>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>League Name</th>
-            <th>Abbreviation</th>
-            <th>Seasons</th>
-            <th>Commissioner</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leagueRows}
-        </tbody>
-      </Table>
+      <div>
+        <Panel>
+          <LeaguesSummary leagues={this.props.leagues} />
+        </Panel>
+        {bottom}
+      </div>
     )
   }
 }
@@ -37,6 +51,13 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    onAddLeagueClick: function(name, abbreviation) {
+      console.log(`AddLeague: ${name}, ${abbreviation}`);
+      dispatch(createLeague(name, abbreviation));
+      this.setState({
+        addingNewLeague: false
+      });
+    }
   };
 }
 

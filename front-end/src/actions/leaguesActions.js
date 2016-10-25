@@ -15,6 +15,14 @@ function receiveLeagues(json) {
   };
 }
 
+function addLeague(league) {
+  return {
+    type: types.ADD_LEAGUE,
+    league: league,
+    receivedAt: Date.now()
+  };
+}
+
 export function fetchLeagues() {
   return function(dispatch) {
     dispatch(requestLeagues);
@@ -22,6 +30,27 @@ export function fetchLeagues() {
       .then(response => response.json())
       .then(json =>
         dispatch(receiveLeagues(json))
-      )
+      );
+  }
+}
+
+export function createLeague(name, abbreviation) {
+  const body = {
+    name,
+    abbreviation
+  };
+  
+  return function(dispatch) {
+    return fetch(
+      'http://localhost:9191/blb/leagues/', {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }).then(response =>
+        fetchLeagues()(dispatch)
+      );
   }
 }

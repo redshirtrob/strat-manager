@@ -20,6 +20,13 @@ export default function leagues(state = initialState, action) {
         leagues: action.leagues,
         lastUpdated: action.receivedAt
       });
+    case types.ADD_LEAGUE:
+      return Object.assign({}, state, {
+        isFetching: false,
+        didInvalidate: false,
+        leagues: [...state.leagues, action.league],
+        lastUpdated: action.receivedAt
+      });
     default:
       return state;
   }
