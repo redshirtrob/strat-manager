@@ -1,14 +1,13 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
 import {Button, Col, Panel, Row} from 'react-bootstrap';
 import LeaguesSummary from './LeaguesSummary';
 import AddLeague from './AddLeague';
 import {createLeague} from '../actions/leaguesActions';
 
 class LeaguesOverview extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       addingNewLeague: false
     };
@@ -18,7 +17,6 @@ class LeaguesOverview extends Component {
     this.setState({
       addingNewLeague: true
     });
-    console.log("onClick");
   }
 
   render() {
@@ -32,6 +30,7 @@ class LeaguesOverview extends Component {
         <Button bsStyle="primary" bsSize="small" onClick={this.onClick.bind(this)}>Add League</Button>
       );
     }
+    
     return (
       <div>
         <Panel>
@@ -52,7 +51,6 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onAddLeagueClick: function(name, abbreviation) {
-      console.log(`AddLeague: ${name}, ${abbreviation}`);
       dispatch(createLeague(name, abbreviation));
       this.setState({
         addingNewLeague: false

@@ -3,7 +3,7 @@ import {Table} from 'react-bootstrap';
 import LeagueSummaryRow from './LeagueSummaryRow';
 
 export default (props) => {
-  const leagueRows =props.leagues.map((league, index) => (
+  const leagueRows = props.leagues.map((league, index) => (
     <LeagueSummaryRow key={index} number={index+1} league={league} />
   ));
 

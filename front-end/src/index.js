@@ -7,7 +7,7 @@ import {Provider} from 'react-redux';
 
 import routes from './routes';
 import configureStore from './store/configureStore';
-import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
+import Bootstrap from 'bootstrap/dist/css/bootstrap-darkly.css';
 import {fetchLeagues} from './actions/leaguesActions';
 
 

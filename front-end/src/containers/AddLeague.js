@@ -11,10 +11,12 @@ import {
 class AddLeague extends Component {
   constructor(props) {
     super(props);
+    
     this.state = {
       leagueName: '',
       leagueAbbreviation: ''
     };
+    
     this.onNameChange = this.onNameChange.bind(this);
     this.onAbbreviationChange = this.onAbbreviationChange.bind(this);
   }
@@ -25,14 +27,12 @@ class AddLeague extends Component {
 
   onNameChange(event) {
     this.setState({
-      ...this.state,
       leagueName: event.target.value
     });
   }
 
   onAbbreviationChange(event) {
     this.setState({
-      ...this.state,
       leagueAbbreviation: event.target.value
     });
   }
@@ -42,21 +42,23 @@ class AddLeague extends Component {
       <Panel>
         <Form>
           <ControlLabel>New League</ControlLabel>
-          <FormGroup controlId="formHorizontalName">
+          <FormGroup bsSize="small" controlId="formHorizontalName">
             <FormControl
                 type="text"
                 value={this.state.leagueName}
                 onChange={this.onNameChange}
-                placeholder="League Name" />
+                placeholder="League Name"
+            />
           </FormGroup>
-          <FormGroup controlId="formHorizontalName">
+          <FormGroup bsSize="small" controlId="formHorizontalName">
             <FormControl
                 type="text"
                 value={this.state.leagueAbbreviation}
                 onChange={this.onAbbreviationChange}
-                placeholder="Abbreviation" />
+                placeholder="Abbreviation"
+            />
           </FormGroup>
-          <Button onClick={this.onClick.bind(this)}>Create</Button>
+          <Button onClick={this.onClick.bind(this)}>Add</Button>
         </Form>
       </Panel>
     );

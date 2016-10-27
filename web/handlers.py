@@ -59,7 +59,7 @@ class BLBLeagueHandler(BaseHandler):
 
 class BLBSeasonHandler(BaseHandler):
     
-    SUPPORTED_METHODS = ('GET', 'POST')
+    SUPPORTED_METHODS = ('GET', 'POST', 'OPTIONS')
 
     @gen.coroutine
     def get(self, season_id=None):

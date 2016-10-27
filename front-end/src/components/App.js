@@ -20,13 +20,13 @@ export default class App extends Component {
             </Navbar.Brand>
           </Navbar.Header>
           <Nav>
-            <LinkContainer to={{pathname: '#teams'}}>
-              <NavItem eventKey={1} href="#teams">Teams</NavItem>
+            <LinkContainer to={{pathname: '/teams'}}>
+              <NavItem eventKey={1} href="/teams">Teams</NavItem>
             </LinkContainer>
-            <LinkContainer to={{pathname: '#leagues'}}>
-              <NavItem eventKey={2} href="#leagues">Leagues</NavItem>
+            <LinkContainer to={{pathname: '/leagues'}}>
+              <NavItem eventKey={2} href="/leagues">Leagues</NavItem>
             </LinkContainer>
-            <NavItem eventKey={3} href="#">Standings</NavItem>
+            <NavItem eventKey={3} href="/">Standings</NavItem>
           </Nav>
         </Navbar>
         <Grid>

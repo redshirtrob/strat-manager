@@ -26,7 +26,7 @@ function addLeague(league) {
 export function fetchLeagues() {
   return function(dispatch) {
     dispatch(requestLeagues);
-    return fetch('http://localhost:9191/blb/leagues/')
+    return fetch("http://localhost:9191/blb/leagues/")
       .then(response => response.json())
       .then(json =>
         dispatch(receiveLeagues(json))
@@ -42,7 +42,7 @@ export function createLeague(name, abbreviation) {
   
   return function(dispatch) {
     return fetch(
-      'http://localhost:9191/blb/leagues/', {
+      "http://localhost:9191/blb/leagues/", {
         method: "POST",
         headers: {
           'Accept': 'application/json',
