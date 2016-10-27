@@ -5,7 +5,7 @@ import {
   Form,
   FormControl,
   FormGroup,
-  Panel
+  Panel,
 } from 'react-bootstrap';
 
 class AddLeague extends Component {
@@ -42,6 +42,7 @@ class AddLeague extends Component {
       <Panel>
         <Form>
           <ControlLabel>New League</ControlLabel>
+          <Button className="close" onClick={(e) => this.props.onCloseClick(e)}>x</Button>
           <FormGroup bsSize="small" controlId="formHorizontalName">
             <FormControl
                 type="text"

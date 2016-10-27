@@ -19,6 +19,12 @@ class SeasonsOverview extends Component {
     });
   }
 
+  onCloseAddSeasonClick() {
+    this.setState({
+      addingNewSeason: false
+    });
+  }
+  
   render() {
     let bottom;
     if (this.state.addingNewSeason === true) {
@@ -26,6 +32,7 @@ class SeasonsOverview extends Component {
         <AddSeason
             seasons={this.props.league.seasons}
             onAddSeasonClick={this.props.onAddSeasonClick.bind(this)}
+            onCloseClick={this.onCloseAddSeasonClick.bind(this)}
         />
       );
     } else {

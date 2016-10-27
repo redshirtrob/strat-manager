@@ -42,6 +42,7 @@ class AddSeason extends Component {
       <Panel>
         <Form>
           <ControlLabel>New Season</ControlLabel>
+          <Button className="close" onClick={(e) => this.props.onCloseClick(e)}>x</Button>
           <FormGroup bsSize="small" controlId="formHorizontalName">
             <FormControl
                 type="text"

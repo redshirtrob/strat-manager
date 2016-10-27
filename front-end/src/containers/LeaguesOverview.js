@@ -19,11 +19,20 @@ class LeaguesOverview extends Component {
     });
   }
 
+  onCloseAddLeagueClick() {
+    this.setState({
+      addingNewLeague: false
+    });
+  }
+
   render() {
     let bottom;
     if (this.state.addingNewLeague === true) {
       bottom = (
-        <AddLeague onAddLeagueClick={this.props.onAddLeagueClick.bind(this)} />
+        <AddLeague
+            onAddLeagueClick={this.props.onAddLeagueClick.bind(this)}
+            onCloseClick={this.onCloseAddLeagueClick.bind(this)}
+        />
       );
     } else {
       bottom = (
