@@ -3,12 +3,12 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {Button, Jumbotron} from 'react-bootstrap';
 
-class TeamsOverview extends Component {
+class Profile extends Component {
   render () {
     return (
       <Jumbotron>
-        <h1>Hello, Teams!</h1>
-        <p>This is a placeholder for the teams overview</p>
+        <h1>Hello, Profile!</h1>
+        <p>This is a placeholder for the user profile</p>
       </Jumbotron>
     )
   }
@@ -27,4 +27,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(TeamsOverview);
+)(Profile);

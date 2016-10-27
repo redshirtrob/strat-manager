@@ -5,7 +5,7 @@ import App from './components/App';
 import LeaguesOverview from './containers/LeaguesOverview';
 import TeamsOverview from './containers/TeamsOverview';
 import LeagueDetails from './containers/LeagueDetails';
-
+import Profile from './containers/Profile';
 
 export default (
   <Route path="/" component={App}>
@@ -13,6 +13,7 @@ export default (
     <Route path="teams" component={TeamsOverview} />
     <Route path="leagues" component={LeaguesOverview} />
     <Route path="leagues/:leagueId" component={LeagueDetails} />
+    <Route path="profile" component={Profile} />
     <Redirect from="*" to="/" />
   </Route>
 );

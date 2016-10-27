@@ -8,7 +8,6 @@ class SeasonSummaryRow extends Component {
 
   onClick(event) {
     console.log(`Event: /leagues/seasons/${this.props.season.id}`);
-    browserHistory.push(`/leagues/season/${this.props.season.id}`);
   }
   
   render() {

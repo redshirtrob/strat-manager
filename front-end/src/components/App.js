@@ -26,7 +26,9 @@ export default class App extends Component {
             <LinkContainer to={{pathname: '/leagues'}}>
               <NavItem eventKey={2} href="/leagues">Leagues</NavItem>
             </LinkContainer>
-            <NavItem eventKey={3} href="/">Standings</NavItem>
+            <LinkContainer to={{pathname: '/profile'}}>
+              <NavItem eventKey={3} href="/profile">Profile</NavItem>
+            </LinkContainer>
           </Nav>
         </Navbar>
         <Grid>

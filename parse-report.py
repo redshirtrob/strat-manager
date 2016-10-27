@@ -119,6 +119,11 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
         with open(full_path, 'w') as f:
             json.dump(stash_ast, f, indent=2)
 
+    if not should_stash and not use_db:
+        stash_ast = ast if skip_clean else flat_ast
+        print json.dumps(stash_ast, indent=2)
+        
+
 if __name__ == '__main__':
     import argparse
 
