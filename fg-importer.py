@@ -5,12 +5,28 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
 
 from blb.models.core import Base
-from blb.models.fangraphs import FGSeason, FGPlayer, \
-    FGPlayerSeason, FGBatting, FGPitching, FGTeam
+from blb.models.fangraphs import (
+    FGSeason,
+    FGPlayer, 
+    FGPlayerSeason,
+    FGBatting,
+    FGPitching,
+    FGTeam
+)
 
-from blb.models.util import FG_BATTING_TO_DB,\
-    FG_PITCHING_TO_DB, clean_value, clean_key
+from blb.models.blb import (
+    BLBDivision,
+    BLBLeague,
+    BLBSeason,
+    BLBTeam
+)
 
+from blb.models.util import (
+    FG_BATTING_TO_DB,
+    FG_PITCHING_TO_DB,
+    clean_value,
+    clean_key
+)
 
 def main(file_type, year, db_file, data_file):
     ENGINE = create_engine('sqlite:///{}'.format(db_file))

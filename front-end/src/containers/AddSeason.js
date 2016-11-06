@@ -13,6 +13,7 @@ class AddSeason extends Component {
     super(props);
     
     this.state = {
+      referenceSeason: '0',
       seasonName: '',
       seasonToClone: '0'
     };
@@ -22,9 +23,24 @@ class AddSeason extends Component {
   }
 
   onClick() {
-    this.props.onAddSeasonClick(this.state.seasonName, this.state.seasonToClone);
+    this.props.onAddSeasonClick(this.state.referenceSeason, this.state.seasonName, this.state.seasonToClone);
   }
-  
+
+  onReferenceSeasonChange(event) {
+    var name = this.state.seasonName;
+    if (name.length === 0 && event.target.value !== '0') {
+      var fgSeason = this.props.fgSeasons.find((season) => {
+        return season.id === parseInt(event.target.value, 10)
+      });
+      name = fgSeason.year;
+    }
+
+    this.setState({
+      referenceSeason: event.target.value,
+      seasonName: name
+    });
+  }
+
   onNameChange(event) {
     this.setState({
       seasonName: event.target.value
@@ -43,7 +59,25 @@ class AddSeason extends Component {
         <Form>
           <ControlLabel>New Season</ControlLabel>
           <Button className="close" onClick={(e) => this.props.onCloseClick(e)}>x</Button>
+          <FormGroup bsSize="small" controlId="formControlsSelect">
+            <ControlLabel>Reference Season</ControlLabel>
+            <FormControl
+                componentClass="select"
+                onChange={(e) => this.onReferenceSeasonChange(e)}
+                placeholder="select">
+              <option key="0" value="0">Reference Season</option>
+              {
+                this.props.fgSeasons.map((fgSeason, index) => {
+                  return (
+                    <option key={fgSeason.id} value={fgSeason.id}>{fgSeason.year}</option>
+                  );
+                })
+              }
+            </FormControl>
+          </FormGroup>
+          
           <FormGroup bsSize="small" controlId="formHorizontalName">
+            <ControlLabel>Season Name</ControlLabel>
             <FormControl
                 type="text"
                 value={this.state.seasonName}
@@ -51,6 +85,7 @@ class AddSeason extends Component {
                 placeholder="Season Name"
             />
           </FormGroup>
+          
           <FormGroup bsSize="small" controlId="formControlsSelect">
             <ControlLabel>Season</ControlLabel>
             <FormControl

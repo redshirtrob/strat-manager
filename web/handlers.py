@@ -48,7 +48,7 @@ class BLBLeagueHandler(BaseHandler):
         except InvalidLeagueException:
             pass
         
-        self.write(json.dumps(leagues))
+        self.write(json.dumps(leagues if leagues is not None else []))
         self.finish()
 
     @gen.coroutine
