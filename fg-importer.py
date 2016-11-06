@@ -12,10 +12,9 @@ from blb.models.util import FG_BATTING_TO_DB,\
     FG_PITCHING_TO_DB, clean_value, clean_key
 
 
-ENGINE = create_engine('sqlite:///blb.db')
-Session = sessionmaker(bind=ENGINE)
-
-def main(file_type, year, data_file):
+def main(file_type, year, db_file, data_file):
+    ENGINE = create_engine('sqlite:///{}'.format(db_file))
+    Session = sessionmaker(bind=ENGINE)
     session = Session()
     
     Base.metadata.create_all(ENGINE)
@@ -76,6 +75,7 @@ if __name__ == '__main__':
     from os.path import basename
 
     parser = argparse.ArgumentParser(description='Import Fangraphs player data from a file into the db')
+    parser.add_argument('db', metavar='DB', help='the DB file')
     parser.add_argument('file', metavar='FILE', help='the Fangraphs file to parse')
     args = parser.parse_args()
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     base, _ = base.split('.')
     source, stat, year = base.split('-')
 
-    main(stat, year, args.file)
+    main(stat, year, args.db, args.file)
     
     
     

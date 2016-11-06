@@ -6,14 +6,12 @@ from sqlalchemy.orm import sessionmaker
 from blb.models.core import Base
 from blb.models.fangraphs import FGTeam
 
-Session = sessionmaker()
-
-def main(data_file):
-    engine = create_engine('sqlite:///blb.db')
-    Session.configure(bind=engine)
+def main(db_file, data_file):
+    ENGINE = create_engine('sqlite:///{}'.format(db_file))
+    Session = sessionmaker(bind=ENGINE)
     session = Session()
     
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(ENGINE)
 
     count = 0
     with open(data_file, 'r') as f:
@@ -34,10 +32,11 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Import MLB team data from a file into the db')
+    parser.add_argument('db', metavar='DB', help='the DB file')
     parser.add_argument('file', metavar='FILE', help='the MLB teams file to parse')
     args = parser.parse_args()
 
-    main(args.file)
+    main(args.db, args.file)
     
     
     
