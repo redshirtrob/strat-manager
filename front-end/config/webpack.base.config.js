@@ -5,7 +5,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const HTML_WEBPACK_OPTIONS = {
   main: {
-    title: 'front-end',
+    title: 'BLB',
     template: 'src/templates/default.ejs',
     inject: false,
     appMountId: 'main',
