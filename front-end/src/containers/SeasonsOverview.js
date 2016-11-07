@@ -45,7 +45,7 @@ class SeasonsOverview extends Component {
     return (
       <div>
         <Panel>
-          <SeasonsSummary seasons={this.props.league.seasons} />
+          <SeasonsSummary seasons={this.props.league.seasons} fgSeasons={this.props.fgSeasons}/>
         </Panel>
         {bottom}
       </div>
