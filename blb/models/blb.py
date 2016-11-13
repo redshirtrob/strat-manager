@@ -36,11 +36,8 @@ class BLBSeason(Base):
     __tablename__ = 'blb_season'
 
     id = Column(Integer, primary_key=True)
+    year = Column(String(4))
     name = Column(String(50), nullable=True)
-
-    # One FGSeason to Many BLBSeasons
-    fg_season_id = Column(Integer, ForeignKey('fg_season.id'))
-    fg_season = relationship('FGSeason')
 
     # One BLBLeague to Many BLBSeasons
     league_id = Column(Integer, ForeignKey('blb_league.id'))
@@ -60,12 +57,11 @@ class BLBSeason(Base):
 
     @classmethod
     def from_dict(cls, dct):
-        return cls(fg_season_id=dct['fg_season_id'], name=dct['name'], league_id=dct['league_id'])
+        return cls(year=dct['year'], name=dct['name'], league_id=dct['league_id'])
     
     def to_dict(self):
         dct = super(BLBSeason, self).to_dict()
-        dct['league_id'] = self.league_id
-        dct['fg_season_id'] = self.fg_season_id
+        dct['year'] = self.year
         dct['name'] = self.name
         return dct
         

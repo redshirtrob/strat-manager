@@ -1,9 +1,9 @@
 import fetch from 'isomorphic-fetch';
 import {fetchLeagues} from './leaguesActions';
 
-export function createSeason(referenceSeason, name, seasonToClone, leagueId) {
+export function createSeason(name, seasonToClone, leagueId) {
   const body = {
-    fg_season_id: referenceSeason,
+    year: name,
     name: name,
     league_id: leagueId
   };

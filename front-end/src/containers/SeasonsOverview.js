@@ -30,7 +30,6 @@ class SeasonsOverview extends Component {
     if (this.state.addingNewSeason === true) {
       bottom = (
         <AddSeason
-            fgSeasons={this.props.fgSeasons}
             seasons={this.props.league.seasons}
             onAddSeasonClick={this.props.onAddSeasonClick.bind(this)}
             onCloseClick={this.onCloseAddSeasonClick.bind(this)}
@@ -55,14 +54,13 @@ class SeasonsOverview extends Component {
 
 function mapStateToProps(state) {
   return {
-    fgSeasons: state.fgSeasons.fgSeasons
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    onAddSeasonClick: function(referenceSeason, name, seasonToClone) {
-      dispatch(createSeason(referenceSeason, name, seasonToClone, this.props.league.id));
+    onAddSeasonClick: function(name, seasonToClone) {
+      dispatch(createSeason(name, seasonToClone, this.props.league.id));
       this.setState({
         addingNewSeason: false
       });

@@ -9,7 +9,6 @@ import routes from './routes';
 import configureStore from './store/configureStore';
 import Bootstrap from 'bootstrap/dist/css/bootstrap-flatly.css';
 import {fetchLeagues} from './actions/leaguesActions';
-import {fetchFgSeasons} from './actions/fgSeasonsActions';
 
 
 const
@@ -47,4 +46,3 @@ if (typeof document !== 'undefined') {
 }
 
 STORE.dispatch(fetchLeagues());
-STORE.dispatch(fetchFgSeasons());
