@@ -14,7 +14,6 @@ class SeasonSummaryRow extends Component {
     return (
       <tr onClick={(e) => this.onClick(e)}>
         <td>{this.props.season.name}</td>
-        <td>{this.props.fgSeason.year}</td>
         <td>Completed</td>
       </tr>
     );

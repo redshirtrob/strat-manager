@@ -60,7 +60,7 @@ class AddSeason extends Component {
           <ControlLabel>New Season</ControlLabel>
           <Button className="close" onClick={(e) => this.props.onCloseClick(e)}>x</Button>
           <FormGroup bsSize="small" controlId="formControlsSelect">
-            <ControlLabel>MLB Season</ControlLabel>
+            <ControlLabel>Reference Season</ControlLabel>
             <FormControl
                 componentClass="select"
                 onChange={(e) => this.onReferenceSeasonChange(e)}
