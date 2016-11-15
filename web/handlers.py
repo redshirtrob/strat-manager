@@ -48,7 +48,7 @@ class BLBLeagueHandler(BaseHandler):
         except InvalidLeagueException:
             pass
         
-        self.write(json.dumps(leagues))
+        self.write(json.dumps(leagues if leagues is not None else []))
         self.finish()
 
     @gen.coroutine
@@ -71,7 +71,7 @@ class BLBSeasonHandler(BaseHandler):
                 seasons = [result]
         elif league_id is not None:
             seasons = yield self.application.store.get_blb_seasons_by_league_id(league_id)
-        self.write(json.dumps(seasons))
+        self.write(json.dumps(seasons if seasons is not None else []))
         self.finish()
 
     @gen.coroutine
@@ -97,7 +97,7 @@ class BLBTeamHandler(BaseHandler):
             teams = yield self.application.store.get_blb_teams_by_division_id(division_id)
         elif season_id is not None:
             teams = yield self.application.store.get_blb_teams_by_season_id(season_id)
-        self.write(json.dumps(teams))
+        self.write(json.dumps(teams if teams is not None else []))
         self.finish()
 
     @gen.coroutine
@@ -120,7 +120,7 @@ class BLBDivisionHandler(BaseHandler):
                 divisions = [result]
         elif season_id is not None:
             divisions = yield self.application.store.get_blb_division_by_season_id(season_id)
-        self.write(json.dumps(divisions))
+        self.write(json.dumps(divisions if divisions is not None else []))
         self.finish()
 
     @gen.coroutine
@@ -135,7 +135,7 @@ class FGSeasonsHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         seasons = yield self.application.store.get_fg_seasons()
-        self.write(json.dumps(seasons))
+        self.write(json.dumps(seasons if seasons is not None else []))
         self.finish()
 
 class FGPlayersHandler(BaseHandler):
@@ -163,7 +163,7 @@ class FGPlayersHandler(BaseHandler):
             self.send_error(404)
             raise gen.Return()
         
-        self.write(json.dumps(players))
+        self.write(json.dumps(players if players is not None else []))
         self.finish()
 
         
