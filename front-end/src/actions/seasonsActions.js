@@ -22,3 +22,27 @@ export function createSeason(name, seasonToClone, leagueId) {
       );
   }
 }
+
+export function createDivision(name, seasonId) {
+  const body = {
+    name: name,
+    season_id: seasonId
+  }
+
+  console.log(JSON.stringify(body));
+
+  return function(dispatch) {
+    return fetch(
+      "http://localhost:9191/blb/divisions/", {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }
+    ).then(response =>
+      fetchLeagues()(dispatch)
+    );
+  }
+}

@@ -63,6 +63,9 @@ class BLBSeason(Base):
         dct = super(BLBSeason, self).to_dict()
         dct['year'] = self.year
         dct['name'] = self.name
+        dct['league_id'] = self.league_id
+        dct['divisions'] = [division.to_dict() for division in self.divisions]
+        dct['teams'] = [team.to_dict() for team in self.teams]
         return dct
         
 

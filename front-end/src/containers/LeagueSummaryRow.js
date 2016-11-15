@@ -7,7 +7,6 @@ class LeagueSummaryRow extends Component {
   }
 
   onClick(event) {
-    console.log(`Event: /leagues/${this.props.league.id}`);
     hashHistory.push(`/leagues/${this.props.league.id}`);
   }
   
