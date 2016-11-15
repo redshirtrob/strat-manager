@@ -2,7 +2,7 @@ import 'babel-polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, browserHistory} from 'react-router';
+import {Router, hashHistory} from 'react-router';
 import {Provider} from 'react-redux';
 
 import routes from './routes';
@@ -25,13 +25,13 @@ if (process.env.NODE_ENV !== 'production') {
 
   ProjectElement = (
     <div>
-      <Router history={browserHistory} routes={routes} />
+      <Router history={hashHistory} routes={routes} />
       <DevTools />
     </div>
   );
 } else {
   // production
-  ProjectElement = <Router history={browserHistory} routes={routes} />;
+  ProjectElement = <Router history={hashHistory} routes={routes} />;
 }
 
 // handle client side rendering

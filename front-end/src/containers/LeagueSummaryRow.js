@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from 'react';
-import { browserHistory } from 'react-router'
+import { hashHistory } from 'react-router'
 
 class LeagueSummaryRow extends Component {
   constructor(props) {
@@ -8,7 +8,7 @@ class LeagueSummaryRow extends Component {
 
   onClick(event) {
     console.log(`Event: /leagues/${this.props.league.id}`);
-    browserHistory.push(`/leagues/${this.props.league.id}`);
+    hashHistory.push(`/leagues/${this.props.league.id}`);
   }
   
   render() {

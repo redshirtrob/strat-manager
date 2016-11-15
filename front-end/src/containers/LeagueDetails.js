@@ -28,15 +28,19 @@ class LeagueDetails extends Component {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>{league.name}</td>
-                <td>{league.abbreviation}</td>
-                <td>Vacant</td>
-              </tr>
+              {league !== undefined &&
+               <tr>
+                 <td>{league.name}</td>
+                 <td>{league.abbreviation}</td>
+                 <td>Vacant</td>
+               </tr>
+              }
             </tbody>
           </Table>
         </Panel>
-        <SeasonsOverview league={league} />
+        {league !== undefined && 
+         <SeasonsOverview league={league} />
+        }
       </div>
     );
   }
