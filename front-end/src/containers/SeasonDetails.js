@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import SeasonDivisions from './SeasonDivisions';
+import SeasonTeams from './SeasonTeams';
 
 class SeasonDetails extends Component {
   constructor(props) {
@@ -27,9 +28,13 @@ class SeasonDetails extends Component {
     console.log(JSON.stringify(season));
     return (
       <div>
-        {season && 
-         <SeasonDivisions season={season}/>
-        }
+      {season &&
+       <div>
+         <SeasonDivisions season={season} />
+         <div className="form-group">&nbsp;</div>
+         <SeasonTeams season={season} />
+       </div>
+      }
       </div>
     );
   }
