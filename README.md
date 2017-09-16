@@ -14,6 +14,15 @@ running:
 $ mongod --config /usr/local/etc/mongod.conf
 ```
 
+### Setting up the environment
+
+Create the virtual environment
+```bash
+$ mkvirtualenv strat-manager
+$ workon strat-manager
+$ pip install -r requirements.txt
+```
+
 ### Extract reports from mbox file
 This is an optional script for extracting dailies, scorebooks, and
 standings files from an mbox file.  This script exists because I had a
@@ -89,13 +98,6 @@ $ ./import-fangraphs.sh
 ```
 
 ### Working with the Database
-
-Create the virtual environment
-```bash
-$ mkvirtualenv strat-manager
-$ workon strat-manager
-$ pip install -r requirements.txt
-```
 
 Launch iPython and load the query file
 ```bash
