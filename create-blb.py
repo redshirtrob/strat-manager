@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
 from tornado import gen
 
+
 from blb.models.fangraphs import (
     FGSeason,
     FGPlayer, 
@@ -26,10 +27,6 @@ from data.exceptions import (
     InvalidPlayerException,
     InvalidYearException
 )
-
-ENGINE = create_engine('sqlite:///blb.db')
-Session = sessionmaker(bind=ENGINE)
-session = Session()
 
 
 def get_or_create_league(data):
@@ -103,8 +100,14 @@ def get_or_create_team(data, season_id, division_id):
     return team
 
 
-def main():
-    with open('./blb.json') as fp:
+def main(db_file, data_file):
+    global session
+    
+    ENGINE = create_engine('sqlite:///{}'.format(db_file))
+    Session = sessionmaker(bind=ENGINE)
+    session = Session()
+
+    with open(data_file) as fp:
         blb_dict = json.load(fp)
 
     league = get_or_create_league(blb_dict)
@@ -117,4 +120,11 @@ def main():
                 team = get_or_create_team(team_dict, season.id, division.id)
 
 if __name__ == '__main__':
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Create BLB leagues from JSON file")
+    parser.add_argument('db', metavar='DB', help='the DB file')
+    parser.add_argument('file', metavar="FILE", help="the input file")
+    args = parser.parse_args()
+    
+    main(args.db, args.file)
