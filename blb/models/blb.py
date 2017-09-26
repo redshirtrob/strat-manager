@@ -1,15 +1,18 @@
-from sqlalchemy import ForeignKey, Table
+from sqlalchemy import ForeignKey, Table, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Float, Integer, String
 from sqlalchemy.types import Boolean, Date, Enum
 
 from .core import Base
-from .fangraphs import FGPlayer
+from .fangraphs import FGPlayer, FGSeason
 
 
 class BLBLeague(Base):
     """BLB Leagues"""
     __tablename__ = 'blb_league'
+    __table_args__ = (
+        UniqueConstraint('name'),
+    )
 
     id = Column(Integer, primary_key=True)
     name = Column(String(200))
@@ -36,10 +39,15 @@ class BLBLeague(Base):
 class BLBSeason(Base):
     """BLB Seasons"""
     __tablename__ = 'blb_season'
+    __table_args__ = (
+        UniqueConstraint('fg_season_id', 'league_id', 'name'),
+    )
 
     id = Column(Integer, primary_key=True)
-    year = Column(String(4))
     name = Column(String(50), nullable=True)
+
+    fg_season_id = Column(Integer, ForeignKey('fg_season.id'))
+    fg_season = relationship('FGSeason')
 
     # One BLBLeague to Many BLBSeasons
     league_id = Column(Integer, ForeignKey('blb_league.id'))
@@ -62,11 +70,14 @@ class BLBSeason(Base):
 
     @classmethod
     def from_dict(cls, dct):
-        return cls(year=dct['year'], name=dct['name'], league_id=dct['league_id'])
+        return cls(
+            fg_season_id=dct['fg_season_id'],
+            name=dct['name'],
+            league_id=dct['league_id'])
     
     def to_dict(self):
         dct = super(BLBSeason, self).to_dict()
-        dct['year'] = self.year
+        dct['fg_season_id'] = self.fg_season_id
         dct['name'] = self.name
         dct['league_id'] = self.league_id
         dct['divisions'] = [division.to_dict() for division in self.divisions]
@@ -77,6 +88,9 @@ class BLBSeason(Base):
 class BLBDivision(Base):
     """BLB Divisions"""
     __tablename__ = 'blb_division'
+    __table_args__ = (
+        UniqueConstraint('season_id', 'name'),
+    )
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
@@ -106,14 +120,15 @@ class BLBDivision(Base):
 class BLBTeam(Base):
     """BLB Teams"""
     __tablename__ = 'blb_team'
+    __table_args__ = (
+        UniqueConstraint('season_id', 'location', 'nickname'),
+        UniqueConstraint('season_id', 'abbreviation')
+    )
 
     id = Column(Integer, primary_key=True)
     location = Column(String(30))
     nickname = Column(String(30))
     abbreviation = Column(String(4))
-
-    # Maps to authenticated account
-    account = Column(String(32), nullable=True)
 
     # One BLBDivision to Many BLBTeams
     division_id = Column(Integer, ForeignKey('blb_division.id'))
