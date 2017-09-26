@@ -27,7 +27,7 @@ from .exceptions import (
 
 ENGINE = create_engine('sqlite:///blb.db')
 Session = sessionmaker(bind=ENGINE)
-session = Session()
+
 
 class SQLStore(object):
 
@@ -207,7 +207,7 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
         
-        results = session.query(FGBatting).join(FGPlayerSeason).join(FGSeason).filter(and_(
+        results = self.session.query(FGBatting).join(FGPlayerSeason).join(FGSeason).filter(and_(
             FGBatting.player_season_id == FGPlayerSeason.id,
             FGPlayerSeason.season_id == FGSeason.id,
             FGSeason.year == year)
@@ -239,7 +239,7 @@ class SQLStore(object):
         if year is None:
             raise InvalidYearException("You must specify a year")
         
-        results = session.query(FGPitching).join(FGPlayerSeason).join(FGSeason).filter(and_(
+        results = self.session.query(FGPitching).join(FGPlayerSeason).join(FGSeason).filter(and_(
             FGPitching.player_season_id == FGPlayerSeason.id, FGSeason.year == year)
         ).all()
 
