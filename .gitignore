@@ -23,6 +23,7 @@ data-files/*
 raw-asts/*
 fg-data-files/*
 *.db
+*.db.save
 *.db.backup
 .cache/*
 tests/.cache/*
