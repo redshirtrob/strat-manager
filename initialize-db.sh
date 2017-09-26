@@ -12,6 +12,10 @@ fi
 
 DB=$1
 
+# Create all the tables
+echo "Creating the database"
+python ./sql-bootstrap.py
+
 # Initialize MLB Teams
 echo "Initializing MLB Teams"
 python ./mlb-importer.py $DB ./fixtures/mlb.csv

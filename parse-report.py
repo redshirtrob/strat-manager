@@ -25,7 +25,8 @@ CITIES = [
     'Philadelphia',
     'St. Louis',
     'Saint Louis',
-    'Steel City'
+    'Steel City',
+    'Washington'
 ]
 
 NICKNAMES = [
@@ -45,6 +46,7 @@ NICKNAMES = [
     'Admirals',
     'Clydesdales',
     'Stogies',
+    'Federals'
 ]
 
 HOF_CITIES = [
@@ -88,7 +90,7 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
     elif report_type == REPORT_TYPE_GAME_DAILY:
         ast = parse_game_daily(html, cities=cities, nicknames=nicknames)
     else:
-        raise Exception("Invalid Type: {}".format(report_type))
+        return
 
     if not skip_clean:
         flat_ast = flatten(ast)

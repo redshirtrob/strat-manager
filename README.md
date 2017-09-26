@@ -57,8 +57,8 @@ $ ./parse-data.py -r
 You can process a single report file into an AST as follows:
 ```bash
 $ mkdir ./raw-asts
-$ ./parse-report.py --stash=./raw-asts ./sample/league-daily.report
-$ ./parse-report.py --stash=./raw-asts ./sample/game-daily.report
+$ ./parse-report.py --stash=./raw-asts --league=blb ./sample/league-daily.report
+$ ./parse-report.py --stash=./raw-asts --league=blb ./sample/game-daily.report
 ```
 
 This will generate an AST from the HTML Report file and store it in a
@@ -72,6 +72,14 @@ You can also insert the AST into a MongoDB database with the
 
 This is a series of scripts to import team and statistical data into a
 database.  It uses a sqlite database for now, called `blb.db`.
+
+The easiest way to import the data is to use the provided
+initialization script:
+```bash
+$ ./initialize-db.sh blb.db
+```
+
+If this succeeds, you can skip the Team and Fangraphs importers.
 
 ### Team Importer
 
@@ -90,11 +98,6 @@ I found most interesting.
 ```bash
 $ ./fg-importer.py ./fixtures/fg-batting-2008.csv
 $ ./fg-importer.py ./fixtures/fg-pitching-2008.csv
-```
-
-Or, import all Fangraph's data with:
-```bash
-$ ./import-fangraphs.sh
 ```
 
 ### Working with the Database

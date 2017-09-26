@@ -1,9 +1,11 @@
 from sqlalchemy import ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Float, Integer, String
+from sqlalchemy.types import Boolean, Date, Enum
 
 from .core import Base
 from .fangraphs import FGPlayer
+
 
 class BLBLeague(Base):
     """BLB Leagues"""
@@ -48,6 +50,9 @@ class BLBSeason(Base):
 
     # Many BLBTeams to One BLBSeason
     teams = relationship('BLBTeam', back_populates='season')
+
+    # Many BLBGames to One BLBSeason
+    games = relationship('BLBGame', back_populates='season')
 
     def __repr__(self):
         if self.name is not None:
@@ -117,7 +122,10 @@ class BLBTeam(Base):
     # One BLBSeason to Many BLBTeams
     season_id = Column(Integer, ForeignKey('blb_season.id'))
     season = relationship('BLBSeason', back_populates='teams')
-    
+
+    # Many BLBRosterEntries to One BLBTeam
+    players = relationship('BLBRosterEntry', back_populates='team')
+
     def __repr__(self):
         return "<BLBTeam({} {})>".format(self.location, self.nickname)
 
@@ -141,10 +149,6 @@ class BLBTeam(Base):
         return dct
 
 
-def BLBRoster(Base):
-    """BLB Roster"""
-
-
 class BLBPlayer(Base):
     """BLB Player"""
     __tablename__ = 'blb_player'
@@ -154,3 +158,149 @@ class BLBPlayer(Base):
     # One FGPlayer to Many BLBPlayers
     fg_player_id = Column(Integer, ForeignKey('fg_player.id'))
     fg_player = relationship('FGPlayer')
+
+    # Many BLBRosterEntries to one BLBPlayer
+    blb_roster_entries = relationship('BLBRosterEntry')
+
+
+class BLBRosterEntry(Base):
+    """BLB Roster"""
+    __tablename__ = 'blb_roster_entry'
+
+    id = Column(Integer, primary_key=True)
+
+    # One BLBPlayer to Many BLBRosterEntries
+    player_id = Column(Integer, ForeignKey('blb_player.id'))
+    player = relationship('BLBPlayer', back_populates='blb_roster_entries')
+
+    # One BLBTeam to Many BLBRosterEntries
+    team_id = Column(Integer, ForeignKey('blb_team.id'))
+    team = relationship('BLBTeam', back_populates='players')
+
+    blb_game_batting = relationship('BLBGameBatting', back_populates='roster_entry')
+
+    blb_game_pitching = relationship('BLBGamePitching', back_populates='roster_entry')
+
+    start_date = Column(Date)
+    end_date = Column(Date, nullable=True)
+
+    is_active = Column(Boolean)
+    
+
+class BLBGame(Base):
+    """BLB Game"""
+    __tablename__ = 'blb_game'
+
+    # Metadata
+    id = Column(Integer, primary_key=True)
+    date = Column(Date) # mm/dd/yyyy
+    attendance = Column(Integer)
+    duration = Column(Integer) # minutes
+    weather = Column(Enum('Good', 'Bad', 'Average'))
+    time_of_day = Column(Enum('day', 'night'))
+
+    # One BLBSeason to Many BLBGames
+    season_id = Column(Integer, ForeignKey('blb_season.id'))
+    season = relationship('BLBSeason', back_populates='games')
+    
+    # One BLBTeam to Many BLBGames
+    home_team_id = Column(Integer, ForeignKey('blb_team.id'))
+    home_team = relationship('BLBTeam', foreign_keys=[home_team_id])
+
+    # One BLBTeam to Many BLBGames
+    away_team_id = Column(Integer, ForeignKey('blb_team.id'))
+    away_team = relationship('BLBTeam', foreign_keys=[away_team_id])
+
+    blb_game_batting = relationship('BLBGameBatting', back_populates='game')
+    blb_game_pitching = relationship('BLBGamePitching', back_populates='game')
+
+    # Game Details
+    home_team_runs = Column(Integer)
+    home_team_hits = Column(Integer)
+    home_team_errors = Column(Integer)
+    home_team_lob = Column(Integer)
+    home_team_double_plays = Column(Integer)
+    
+    away_team_runs = Column(Integer)
+    away_team_hits = Column(Integer)
+    away_team_errors = Column(Integer)
+    away_team_lob = Column(Integer)
+    away_team_double_plays = Column(Integer)
+
+    def __repr__(self):
+        return "<BLBGame({} {})>".format(self.home, self.away)
+
+    @classmethod
+    def from_dict(cls, dct):
+        return cls(
+            date=dct['date'],
+            attendance=dct['attendance'],
+            duration=dct['duration'],
+            weather=dct['weather'],
+            time_of_day=dct['time_of_day'],
+            home_team_id=dct['home_team_id'],
+            away_team_id=dct['away_team_id']
+        )
+    
+    def to_dict(self):
+        dct = super(BLBGame, self).to_dict()
+        dct['date'] = self.date
+        dct['attendance'] = self.attendance
+        dct['duration'] = self.duration
+        dct['weather'] = self.weather
+        dct['time_of_day'] = self.time_of_day
+        dct['home_team_id'] = self.home_team_id
+        dct['away_team_id'] = self.away_team_id
+
+
+class BLBGameBatting(Base):
+    """BLB Batting stats for a BLB Game"""
+    __tablename__ = 'blb_game_batting'
+
+    id = Column(Integer, primary_key=True)
+
+    roster_entry_id = Column(Integer, ForeignKey('blb_roster_entry.id'))
+    roster_entry = relationship('BLBRosterEntry', back_populates='blb_game_batting')
+
+    game_id = Column(Integer, ForeignKey('blb_game.id'))
+    game = relationship('BLBGame', back_populates='blb_game_batting')
+
+    ab = Column(Integer)
+    pa = Column(Integer)
+    r = Column(Integer)
+    h = Column(Integer)
+    bb = Column(Integer)
+    ibb = Column(Integer)
+    so = Column(Integer)
+    rbi = Column(Integer)
+    single = Column(Integer)
+    double = Column(Integer)
+    triple = Column(Integer)
+    hr = Column(Integer)
+    sb = Column(Integer)
+    cs = Column(Integer)
+    hbp = Column(Integer)
+    gdp = Column(Integer)
+
+
+class BLBGamePitching(Base):
+    """BLB Pitching stats for a BLB Game"""
+    __tablename__ = 'blb_game_pitching'
+
+    id = Column(Integer, primary_key=True)
+
+    roster_entry_id = Column(Integer, ForeignKey('blb_roster_entry.id'))
+    roster_entry = relationship('BLBRosterEntry', back_populates='blb_game_pitching')
+
+    game_id = Column(Integer, ForeignKey('blb_game.id'))
+    game = relationship('BLBGame', back_populates='blb_game_pitching')
+    
+    ip = Column(Integer) # Outs recorded, e.g. 1 2/3 IP = 5 Outs
+    h = Column(Integer)
+    r = Column(Integer)
+    er = Column(Integer)
+    bb = Column(Integer)
+    so = Column(Integer)
+    hr = Column(Integer)
+    pc = Column(Integer)
+    

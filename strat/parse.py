@@ -38,11 +38,12 @@ class GameReportSemanticActions(object):
 
     def validate_nickname(self, nickname):
         if nickname is None:
-            raise Exception
+            raise Exception("Invalid nickname: None")
 
-        nickname = self.find_nickname(nickname.lower())
-        if nickname is None:
-            raise Exception
+        tmp_nickname = self.find_nickname(nickname.lower())
+        if tmp_nickname is None:
+            raise Exception("Invalid nickname: {}".format(nickname))
+        nickname = tmp_nickname
 
     def boxscore_matchup(self, ast):
         if ast.phrase is None:
