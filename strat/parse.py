@@ -173,20 +173,18 @@ def parse_league_daily(html, cities=None, nicknames=None):
     semantics = GameReportSemanticActions(cities=cities, nicknames=nicknames)
     parser = GameReportParser(parseinfo=False, semantics=semantics)
 
-    stories_ast = None
+    stories_ast = []
     for table in tables:
         try:
-            stories_ast = parser.parse(table.prettify(), 'game_story_table')
-            break
+            stories_ast[-1:-1] = parser.parse(table.prettify(), 'game_story_table')
         except FailedParse:
             pass
 
-    boxscores_ast = None
+    boxscores_ast = []
     for table in tables:
         try:
-            boxscores_ast = parser.parse(table.prettify(), 'boxscore_table')
-            break
-        except FailedParse:
+            boxscores_ast[-1:-1] = parser.parse(table.prettify(), 'boxscore_table')
+        except FailedParse as e:
             pass
 
     if stories_ast is None or boxscores_ast is None:

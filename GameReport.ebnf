@@ -572,7 +572,8 @@ boxscore_table =
 
 boxscore_all =
     page_break
-    @:{boxscore_table} ;
+    @:{boxscore_table}
+    ;
 
 (* Game Stories *)
 

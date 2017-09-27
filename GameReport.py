@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2016, 1, 9, 22, 50, 11, 5)
+__version__ = (2017, 9, 27, 16, 3, 4, 2)
 
 __all__ = [
     'GameReportParser',
@@ -1406,6 +1406,13 @@ class GameReportParser(Parser):
         def block1():
             self._boxscore_table_()
         self._closure(block1)
+        self.ast['@'] = self.last_node
+        with self._optional():
+            self._page_break_()
+
+        def block3():
+            self._boxscore_table_()
+        self._closure(block3)
         self.ast['@'] = self.last_node
 
     @graken()
