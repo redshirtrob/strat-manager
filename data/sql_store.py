@@ -189,6 +189,8 @@ class SQLStore(object):
             FGSeason.year == str(int(dct['year'])-1),
             BLBSeason.league_id == league_id
             )).one_or_none()
+
+        # Using location can cause problems, e.g. 'St.' == 'Saint'
         team = self.session.query(BLBTeam).filter(and_(
             BLBTeam.nickname.ilike(dct['nickname']),
             BLBTeam.season_id == season.id

@@ -202,6 +202,17 @@ class BLBGame(Base):
     weather = Column(Enum('Good', 'Bad', 'Average'))
     time_of_day = Column(Enum('Day', 'Night'))
 
+    # Support Regular/Pre/Post Season games
+    game_type = Column(Enum(
+        'Spring Training',
+        'Regular Season',
+        'Wild Card Series',
+        'Divisional Series',
+        'League Championchip Series',
+        'Super Series'),
+        default='Regular Season'
+      )
+    
     # One BLBSeason to Many BLBGames
     season_id = Column(Integer, ForeignKey('blb_season.id'))
     season = relationship('BLBSeason', back_populates='games')
