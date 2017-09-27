@@ -153,15 +153,6 @@ class BLBTeam(Base):
             division_id=dct['division_id'],
             season_id=dct['season_id']
         )
-    
-    def to_dict(self):
-        dct = super(BLBTeam, self).to_dict()
-        dct['location'] = self.location
-        dct['nickname'] = self.nickname
-        dct['abbreviation'] = self.abbreviation
-        dct['division_id'] = self.division_id
-        dct['season_id'] = self.season_id
-        return dct
 
 
 class BLBPlayer(Base):
@@ -226,6 +217,8 @@ class BLBGame(Base):
     away_team_id = Column(Integer, ForeignKey('blb_team.id'))
     away_team = relationship('BLBTeam', foreign_keys=[away_team_id])
 
+    blb_inning = relationship('BLBInning', back_populates='game')
+
     blb_game_batting = relationship('BLBGameBatting', back_populates='game')
     blb_game_pitching = relationship('BLBGamePitching', back_populates='game')
 
@@ -256,18 +249,37 @@ class BLBGame(Base):
             home_team_id=dct['home_team_id'],
             away_team_id=dct['away_team_id']
         )
+
+
+class BLBInning(Base):
+    """BLB Inning details for a BLB Game"""
+    __tablename__ = 'blb_inning'
+    __table_args__ = (
+        UniqueConstraint('number', 'half', 'game_id'),
+        )
+
+    id = Column(Integer, primary_key=True)
+    number = Column(Integer)
+    half = Column(Enum('Top', 'Bottom'))
+
+    r = Column(Integer)
+
+    game_id = Column(Integer, ForeignKey('blb_game.id'))
+    game = relationship('BLBGame', back_populates='blb_inning')
     
-    def to_dict(self):
-        dct = super(BLBGame, self).to_dict()
-        dct['date'] = self.date
-        dct['attendance'] = self.attendance
-        dct['duration'] = self.duration
-        dct['weather'] = self.weather
-        dct['time_of_day'] = self.time_of_day
-        dct['home_team_id'] = self.home_team_id
-        dct['away_team_id'] = self.away_team_id
+    def __repr__(self):
+        return "<BLBInning({} {})>".format(self.half, self.number)
 
+    @classmethod
+    def from_dict(self, dct):
+        return cls(
+            number=dct['number'],
+            half=dct['half'],
+            r=dct['runs'],
+            game_id=dct['game_id']
+            )
 
+    
 class BLBGameBatting(Base):
     """BLB Batting stats for a BLB Game"""
     __tablename__ = 'blb_game_batting'

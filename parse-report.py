@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from datetime import datetime
 from pymongo import MongoClient
 import json
 import os
@@ -71,6 +72,15 @@ HOF_NICKNAMES = [
     'Rajahs'
 ]
 
+
+def report_type_string(report_type):
+    if report_type == REPORT_TYPE_GAME_DAILY:
+        return 'game-daily'
+    elif report_type == REPORT_TYPE_LEAGUE_DAILY:
+        return 'league-daily'
+    else:
+        return 'unknown'
+
 def main(filename, stash_directory=None, use_db=False, skip_clean=False, league='blb'):
     should_stash = stash_directory is not None
 
@@ -114,8 +124,11 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
         client.close()
         
     if should_stash:
-        rootname = os.path.splitext(os.path.basename(filename))[0]
-        dst_filename = '{}-ast.dat'.format(rootname)
+        matchup_datetime = datetime.strptime(flat_ast['boxscores'][0]['matchup']['date'], '%m/%d/%Y')
+        dst_filename = '{}-{}-ast.dat'.format(
+            matchup_datetime.strftime('%Y-%m-%d'),
+            report_type_string(report_type)
+        )
         full_path = os.path.join(stash_directory, dst_filename)
         stash_ast = ast if skip_clean else flat_ast
         with open(full_path, 'w') as f:
