@@ -63,10 +63,7 @@ class BLBSeason(Base):
     games = relationship('BLBGame', back_populates='season')
 
     def __repr__(self):
-        if self.name is not None:
-            return "<BLBSeason({} {})>".format(self.year, self.name)
-        else:
-            return "<BLBSeason({})>".format(self.year)
+        return "<BLBSeason({}, {})>".format(self.name, self.id)
 
     @classmethod
     def from_dict(cls, dct):

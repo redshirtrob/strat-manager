@@ -11,10 +11,7 @@ from data.sql_store import SQLStore
 
 
 def main(db_file, data_file):
-    global session
-
     store = SQLStore(db_file)
-    session = store.session
 
     with open(data_file) as fp:
         blb_dict = json.load(fp)

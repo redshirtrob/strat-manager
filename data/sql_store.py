@@ -68,8 +68,18 @@ class SQLStore(object):
             raise InvalidLeagueException("You must specify a league id")
 
         league = self.session.query(BLBLeague).one_or_none(BLBLeague.id == league_id)
-        raise gen.Return(league.to_dict)
+        raise gen.Return(league)
 
+    @gen.coroutine
+    def get_blb_league_by_name(self, league_name=None):
+        """Get a BLB League"""
+
+        if league_name is None:
+            raise InvalidLeagueException("You must specify a league name")
+
+        league = self.session.query(BLBLeague).filter(BLBLeague.name == league_name).one_or_none()
+        raise gen.Return(league)
+    
     @gen.coroutine
     def create_blb_season(self, dct):
         """Create a BLB Season"""
@@ -172,6 +182,18 @@ class SQLStore(object):
             self.session.commit()
         raise gen.Return(team)
 
+    @gen.coroutine
+    def get_blb_team(self, dct, league_id):
+        season = self.session.query(BLBSeason).join(FGSeason).filter(and_(
+            BLBSeason.fg_season_id == FGSeason.id,
+            FGSeason.year == str(int(dct['year'])-1),
+            BLBSeason.league_id == league_id
+            )).one_or_none()
+        team = self.session.query(BLBTeam).filter(and_(
+            BLBTeam.nickname.ilike(dct['nickname']),
+            BLBTeam.season_id == season.id
+            )).one_or_none()
+        raise gen.Return(team)
 
     @gen.coroutine
     def get_blb_team_by_team_id(self, team_id=None):
