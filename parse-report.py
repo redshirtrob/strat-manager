@@ -124,10 +124,12 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
         client.close()
         
     if should_stash:
+        rootname = os.path.splitext(os.path.basename(filename))[0]
         matchup_datetime = datetime.strptime(flat_ast['boxscores'][0]['matchup']['date'], '%m/%d/%Y')
-        dst_filename = '{}-{}-ast.dat'.format(
+        dst_filename = '{}-{}-{}-ast.dat'.format(
             matchup_datetime.strftime('%Y-%m-%d'),
-            report_type_string(report_type)
+            report_type_string(report_type),
+            rootname
         )
         full_path = os.path.join(stash_directory, dst_filename)
         stash_ast = ast if skip_clean else flat_ast

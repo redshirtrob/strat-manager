@@ -187,8 +187,8 @@ def parse_league_daily(html, cities=None, nicknames=None):
         except FailedParse as e:
             pass
 
-        if len(stories_ast) == 0 or len(boxscores_ast) == 0:
-            raise Exception
+    if len(stories_ast) == 0 or len(boxscores_ast) == 0:
+        raise Exception
 
     return AST(game_stories=stories_ast, boxscores=boxscores_ast)
 
