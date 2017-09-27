@@ -25,14 +25,13 @@ from .exceptions import (
     InvalidYearException
 )
 
-ENGINE = create_engine('sqlite:///blb.db')
-Session = sessionmaker(bind=ENGINE)
-
 
 class SQLStore(object):
 
-    def __init__(self):
-        self.session = Session()
+    def __init__(self, db_file='blb.db'):
+        self.ENGINE = create_engine('sqlite:///{}'.format(db_file))
+        self.Session = sessionmaker(bind=self.ENGINE)
+        self.session = self.Session()
 
     @gen.coroutine
     def create_blb_league(self, dct):
@@ -42,6 +41,15 @@ class SQLStore(object):
         self.session.add(blb_league)
         self.session.commit()
         raise gen.Return()
+
+    @gen.coroutine
+    def get_or_create_blb_league(self, dct):
+        league = self.session.query(BLBLeague).filter(BLBLeague.name == dct['name']).one_or_none()
+        if league is None:
+            league = BLBLeague.from_dict(dct)
+            self.session.add(league)
+            self.session.commit()
+        raise gen.Return(league)
 
     @gen.coroutine
     def get_blb_leagues(self):
@@ -72,6 +80,21 @@ class SQLStore(object):
         raise gen.Return()
 
     @gen.coroutine
+    def get_or_create_blb_season(self, dct):
+        fg_season = self.session.query(FGSeason).filter(FGSeason.year == dct['year']).one_or_none()
+        
+        season = self.session.query(BLBSeason).filter(and_(
+            BLBSeason.league_id == dct['league_id'],
+            BLBSeason.name == dct['name'])
+        ).one_or_none()
+        if season is None:
+            dct['fg_season_id'] = fg_season.id
+            season = BLBSeason.from_dict(dct)
+            self.session.add(season)
+            self.session.commit()
+        raise gen.Return(season)
+
+    @gen.coroutine
     def get_blb_seasons_by_league_id(self, league_id):
         """Get all seasons in a league"""
         
@@ -98,6 +121,18 @@ class SQLStore(object):
         raise gen.Return()
 
     @gen.coroutine
+    def get_or_create_blb_division(self, dct):
+        division = self.session.query(BLBDivision).filter(and_(
+            BLBDivision.name == dct['name'],
+            BLBDivision.season_id == dct['season_id'])
+        ).one_or_none()
+        if division is None:
+            division = BLBDivision.from_dict(dct)
+            self.session.add(division)
+            self.session.commit()
+        raise gen.Return(division)
+
+    @gen.coroutine
     def get_blb_division_by_division_id(self, division_id=None):
         """Get a BLB Division based on the division id"""
 
@@ -122,6 +157,21 @@ class SQLStore(object):
         self.session.add(blb_team)
         self.session.commit()
         raise gen.Return()
+
+    @gen.coroutine
+    def get_or_create_blb_team(self, dct):
+        team = self.session.query(BLBTeam).filter(and_(
+            BLBTeam.location == dct['location'],
+            BLBTeam.nickname == dct['nickname'],
+            BLBTeam.abbreviation == dct['abbreviation'],
+            BLBTeam.season_id == dct['season_id']
+            )).one_or_none()
+        if team is None:
+            team = BLBTeam.from_dict(dct)
+            self.session.add(team)
+            self.session.commit()
+        raise gen.Return(team)
+
 
     @gen.coroutine
     def get_blb_team_by_team_id(self, team_id=None):
@@ -158,6 +208,15 @@ class SQLStore(object):
             seasons = [s.to_dict() for s in results]
             raise gen.Return(seasons)
 
+    @gen.coroutine
+    def get_fg_season_by_year(self, year=None):
+        """Get a single season"""
+        
+        results = self.session.query(FGSeason).all()
+        if results:
+            seasons = [s.to_dict() for s in results]
+            raise gen.Return(seasons)
+        
     @gen.coroutine
     def get_fg_players_by_year(self, year=None):
         """Get a list of all players"""

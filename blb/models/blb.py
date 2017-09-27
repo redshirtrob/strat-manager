@@ -212,7 +212,7 @@ class BLBGame(Base):
     attendance = Column(Integer)
     duration = Column(Integer) # minutes
     weather = Column(Enum('Good', 'Bad', 'Average'))
-    time_of_day = Column(Enum('day', 'night'))
+    time_of_day = Column(Enum('Day', 'Night'))
 
     # One BLBSeason to Many BLBGames
     season_id = Column(Integer, ForeignKey('blb_season.id'))
@@ -271,6 +271,9 @@ class BLBGame(Base):
 class BLBGameBatting(Base):
     """BLB Batting stats for a BLB Game"""
     __tablename__ = 'blb_game_batting'
+    __table_args__ = (
+        UniqueConstraint('roster_entry_id', 'game_id'),
+    )
 
     id = Column(Integer, primary_key=True)
 
@@ -301,6 +304,9 @@ class BLBGameBatting(Base):
 class BLBGamePitching(Base):
     """BLB Pitching stats for a BLB Game"""
     __tablename__ = 'blb_game_pitching'
+    __table_args__ = (
+        UniqueConstraint('roster_entry_id', 'game_id'),
+    )
 
     id = Column(Integer, primary_key=True)
 
