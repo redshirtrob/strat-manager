@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2017, 9, 27, 16, 3, 4, 2)
+__version__ = (2017, 9, 28, 5, 58, 41, 3)
 
 __all__ = [
     'GameReportParser',
@@ -123,19 +123,19 @@ class GameReportParser(Parser):
 
     @graken()
     def _full_name_(self):
-        self._pattern(r"[A-Za-z\.\-\'\s]+")
+        self._pattern(r"[A-Za-z\.\-\'\s\*]+")
 
     @graken()
     def _full_name_no_injured_(self):
-        self._pattern(r"[A-Za-z\.\s\-\']+(?= INJURED)")
+        self._pattern(r"[A-Za-z\.\s\-\'\*]+(?= INJURED)")
 
     @graken()
     def _full_name_no_gem_event_(self):
-        self._pattern(r"[A-Za-z\.\s\-\']+(?= (robbed|blocked|turns))")
+        self._pattern(r"[A-Za-z\.\s\-\'\*]+(?= (robbed|blocked|turns))")
 
     @graken()
     def _full_name_no_of_(self):
-        self._pattern(r"[A-Za-z\.\s\-\']+(?= of)")
+        self._pattern(r"[A-Za-z\.\s\-\'\*]+(?= of)")
 
     @graken()
     def _nickname_no_sep_(self):
@@ -1406,13 +1406,6 @@ class GameReportParser(Parser):
         def block1():
             self._boxscore_table_()
         self._closure(block1)
-        self.ast['@'] = self.last_node
-        with self._optional():
-            self._page_break_()
-
-        def block3():
-            self._boxscore_table_()
-        self._closure(block3)
         self.ast['@'] = self.last_node
 
     @graken()
