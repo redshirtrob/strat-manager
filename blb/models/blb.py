@@ -193,6 +193,10 @@ class BLBRosterEntry(Base):
 class BLBGame(Base):
     """BLB Game"""
     __tablename__ = 'blb_game'
+    __table_args__ = (
+        # Should be enough to prevent double entries
+        UniqueConstraint('date', 'attendance', 'duration', 'time_of_day', 'home_team_id', 'away_team_id'),
+    )
 
     # Metadata
     id = Column(Integer, primary_key=True)
@@ -236,27 +240,21 @@ class BLBGame(Base):
     home_team_errors = Column(Integer)
     home_team_lob = Column(Integer)
     home_team_double_plays = Column(Integer)
+    home_team_triple_plays = Column(Integer)
     
     away_team_runs = Column(Integer)
     away_team_hits = Column(Integer)
     away_team_errors = Column(Integer)
     away_team_lob = Column(Integer)
     away_team_double_plays = Column(Integer)
+    away_team_triple_plays = Column(Integer)
 
     def __repr__(self):
         return "<BLBGame({} {})>".format(self.home, self.away)
 
     @classmethod
     def from_dict(cls, dct):
-        return cls(
-            date=dct['date'],
-            attendance=dct['attendance'],
-            duration=dct['duration'],
-            weather=dct['weather'],
-            time_of_day=dct['time_of_day'],
-            home_team_id=dct['home_team_id'],
-            away_team_id=dct['away_team_id']
-        )
+        return cls(**dct)
 
 
 class BLBInning(Base):
