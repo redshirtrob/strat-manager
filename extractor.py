@@ -43,10 +43,6 @@ def main(mbox_file, stash_directory=None, use_db=False):
         subject = message['subject']
         message_id = message['Message-ID']
 
-        # Skip replies and forwards
-        if subject.lower().startswith('re:') or subject.lower().startswith('fw:'):
-            continue
-
         # Skip spring training and post-season games
         non_season = ['lcs', 'spring training', 'super series', 'ss', 'wcs']
         if any(x in subject.lower() for x in non_season):
