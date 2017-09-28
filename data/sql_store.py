@@ -16,7 +16,8 @@ from blb.models.blb import (
     BLBDivision,
     BLBLeague,
     BLBSeason,
-    BLBTeam
+    BLBTeam,
+    BLBGame
 )
 
 from .exceptions import (
@@ -222,6 +223,15 @@ class SQLStore(object):
         if results is not None:
             teams = [team.to_dict() for team in results]
             raise gen.Return(teams)
+
+    @gen.coroutine
+    def create_blb_game(self, dct):
+        """Create a BLB game"""
+
+        blb_game = BLBGame.from_dict(dct)
+        self.session.add(blb_game)
+        self.session.commit()
+        raise gen.Return()
 
     @gen.coroutine
     def get_fg_seasons(self):
