@@ -36,17 +36,6 @@ changes you can generate a new version as follows:
 $ grako GameReport.ebnf >GameReport.py
 ```
 
-### Batch parsing all reports
-You can batch process all report files.
-```bash
-$ ./parse-data.py
-```
-
-Use the `-r` option to reprocess all the files.
-```bash
-$ ./parse-data.py -r
-```
-
 ### Parsing a single report
 You can process a single report file into an AST as follows:
 ```bash
