@@ -17,7 +17,7 @@ from grako.parsing import graken, Parser
 from grako.util import re, RE_FLAGS
 
 
-__version__ = (2017, 9, 28, 5, 58, 41, 3)
+__version__ = (2017, 9, 29, 3, 7, 37, 4)
 
 __all__ = [
     'GameReportParser',
@@ -107,7 +107,7 @@ class GameReportParser(Parser):
 
     @graken()
     def _short_name_no_pos_(self):
-        self._pattern(r"[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))")
+        self._pattern(r"[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|1|2B|2|3B|3|SS|S|LF|L|CF|C|RF|R|PR|DH|D|PH))")
 
     @graken()
     def _short_name_no_result_(self):
@@ -155,24 +155,40 @@ class GameReportParser(Parser):
             with self._option():
                 self._token('1B')
             with self._option():
+                self._token('1')
+            with self._option():
                 self._token('2B')
+            with self._option():
+                self._token('2')
             with self._option():
                 self._token('3B')
             with self._option():
+                self._token('3')
+            with self._option():
                 self._token('SS')
+            with self._option():
+                self._token('S')
             with self._option():
                 self._token('LF')
             with self._option():
+                self._token('L')
+            with self._option():
                 self._token('CF')
             with self._option():
+                self._token('C')
+            with self._option():
                 self._token('RF')
+            with self._option():
+                self._token('R')
             with self._option():
                 self._token('PR')
             with self._option():
                 self._token('DH')
             with self._option():
+                self._token('D')
+            with self._option():
                 self._token('PH')
-            self._error('expecting one of: 1B 2B 3B C CF DH LF P PH PR RF SS')
+            self._error('expecting one of: 1 1B 2 2B 3 3B C CF D DH L LF P PH PR R RF S SS')
 
     @graken()
     def _parenthesized_position_(self):

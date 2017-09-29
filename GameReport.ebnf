@@ -21,7 +21,7 @@ font_close = '</font>' ;
 
 (* J.Bradley Jr *)
 short_name = ?/[A-Z]\.[A-Za-z\*\-\'\s]+/? ;
-short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|2B|3B|SS|LF|CF|RF|PR|DH|PH))/? ;
+short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|1|2B|2|3B|3|SS|S|LF|L|CF|C|RF|R|PR|DH|D|PH))/? ;
 short_name_no_result = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|B|[0-9]))/? ;
 
 last_name = ?/[A-Za-z\-\'\s\*]+/? ;
@@ -36,7 +36,7 @@ nickname_no_sep = ?/[A-Za-z0-9\'\s]+(?=(\:|\.|\s+AB|\s+IP|\())/? ;
 
 phrase = ?/[A-Za-z0-9\'\s\.\/]*/? ;
 
-position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'CF' | 'RF' | 'PR' | 'DH' | 'PH';
+position = 'P' | 'C' | '1B' | '1' | '2B' | '2' | '3B' | '3' | 'SS' | 'S' | 'LF' | 'L' | 'CF' | 'C' | 'RF' | 'R' | 'PR' | 'DH' | 'D' | 'PH';
 parenthesized_position = '(' @:position ')';
 
 year = ?/[0-9]{4}/? ;
