@@ -6,13 +6,7 @@ files: dailies, scorebooks, and standings.  This pipeline only handles
 dailies and standings files as I only have a very small number of
 scorebook files relative to dailies and standings.
 
-The scripts can use the filesystem, mongodb or both as an intermediate
-data store.  If you want to use mongo be sure to have a server
-running:
-
-```bash
-$ mongod --config /usr/local/etc/mongod.conf
-```
+The scripts use the filesystem as a datastore.
 
 ### Setting up the environment
 
@@ -63,10 +57,6 @@ $ ./parse-report.py --stash=./raw-asts --league=blb ./sample/game-daily.report
 
 This will generate an AST from the HTML Report file and store it in a
 file called `./raw-asts/file-ast.dat`.
-
-You can also insert the AST into a MongoDB database with the
-`--use-db` option.  You can skip the AST cleaning phase by passing the
-`--skip-clean` option.
 
 # Importers
 

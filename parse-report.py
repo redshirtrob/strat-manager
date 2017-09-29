@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from pymongo import MongoClient
 import json
 import os
 
@@ -81,7 +80,7 @@ def report_type_string(report_type):
     else:
         return 'unknown'
 
-def main(filename, stash_directory=None, use_db=False, skip_clean=False, league='blb'):
+def main(filename, stash_directory=None, league='blb'):
     should_stash = stash_directory is not None
 
     if league == 'blb':
@@ -102,27 +101,8 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
     else:
         return
 
-    if not skip_clean:
-        flat_ast = flatten(ast)
+    flat_ast = flatten(ast)
 
-    if use_db:
-        client = MongoClient('mongodb://localhost:27017')
-        db = client.get_database('extractor')
-        collection = db.reports
-
-        document = {'filename': os.path.basename(filename),
-                    'subject': '',
-                    'content': html,
-                    'type': report_type,
-                    'ast': ast
-        }
-
-        if not skip_clean:
-            document['flat_ast'] = flat_ast
-            
-        collection.insert_one(document)
-        client.close()
-        
     if should_stash:
         rootname = os.path.splitext(os.path.basename(filename))[0]
         matchup_datetime = datetime.strptime(flat_ast['boxscores'][0]['matchup']['date'], '%m/%d/%Y')
@@ -132,13 +112,10 @@ def main(filename, stash_directory=None, use_db=False, skip_clean=False, league=
             rootname
         )
         full_path = os.path.join(stash_directory, dst_filename)
-        stash_ast = ast if skip_clean else flat_ast
         with open(full_path, 'w') as f:
-            json.dump(stash_ast, f, indent=2)
-
-    if not should_stash and not use_db:
-        stash_ast = ast if skip_clean else flat_ast
-        print json.dumps(stash_ast, indent=2)
+            json.dump(flat_ast, f, indent=2)
+    else:
+        print json.dumps(flat_ast, indent=2)
         
 
 if __name__ == '__main__':
@@ -147,13 +124,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="League daily parser for Strat-O-Matic Report files")
     parser.add_argument('--stash', nargs='?', dest='dir',
                         help='directory to dump ASTs to')
-    parser.add_argument('--skip-clean', action='store_true', default=False,
-                        help='don\'t clean the AST before writing')
-    parser.add_argument('--use-db', action='store_true', default=False,
-                        help='insert AST into a database')
     parser.add_argument('--league', choices=['blb', 'hof'], default='blb',
                         help='league the data belongs to')
     parser.add_argument('file', metavar="FILE", help="the input file to parse")
     args = parser.parse_args()
     
-    main(args.file, args.dir, args.use_db, args.skip_clean, args.league)
+    main(args.file, args.dir, args.league)
