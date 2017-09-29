@@ -18,7 +18,7 @@ python ./sql-bootstrap.py
 
 # Initialize MLB Teams
 echo "Initializing MLB Teams"
-python ./mlb-importer.py $DB ./fixtures/mlb.csv
+./mlb-importer.py $DB ./fixtures/mlb.csv
 
 # Initialize FG Data
 FILES=./fixtures/fg-*.csv
@@ -26,5 +26,9 @@ FILES=./fixtures/fg-*.csv
 for f in $FILES
 do
     echo "Importing data from $f"
-    python ./fg-importer.py $DB $f
+    ./fg-importer.py $DB $f
 done
+
+# Initialize BLB League
+echo "Initializing BLB League"
+./create-blb.py $DB ./fixtures/blb.json
