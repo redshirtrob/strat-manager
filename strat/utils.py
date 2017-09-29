@@ -38,6 +38,9 @@ def get_title(html):
         return title.contents[0]
     return "No Title"
 
+def is_game_report(report_type):
+    return report_type in [REPORT_TYPE_LEAGUE_DAILY, REPORT_TYPE_GAME_DAILY]
+
 INT_KEYS = ('part', 'game_count', 'season_count', )
 NAME_KEYS = ('name', 'player_name')
 
