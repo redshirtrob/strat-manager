@@ -50,7 +50,7 @@ def clean(item, key):
     # These keys should have null values converted to '1'
     if item is None and key in INT_KEYS:
         item = '1'
-    elif isinstance(item, str) or isinstance(item, unicode):
+    elif isinstance(item, str):
         # Some strings have trailing whitespace, kill this off
         item = item.strip()
 

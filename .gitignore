@@ -31,3 +31,5 @@ tests/.cache/*
 .ropeproject/*
 
 node_modules/
+
+venv/

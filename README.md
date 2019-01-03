@@ -12,8 +12,9 @@ The scripts use the filesystem as a datastore.
 
 Create the virtual environment
 ```bash
-$ mkvirtualenv strat-manager
-$ workon strat-manager
+$ cd strat-manager
+$ virtualenv venv
+$ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
@@ -28,12 +29,12 @@ $ mkdir ./data-files
 $ ./extractor.py --stash=./data-files --use-db sample/gmail.mbox
 ```
 
-### Generating the Grako Parser
-Before using the parsers you need to generate the Grako Parser file.
+### Generating The TatSu Parser
+Before using the parsers you need to generate the TatSu Parser file.
 This file is pre-generated as a convenience, but if you need to make
 changes you can generate a new version as follows:
 ```bash
-$ grako GameReport.ebnf >GameReport.py
+$ python -m tatsu -m GameReport GameReport.ebnf >GameReport.py
 ```
 
 ### Parsing a single report

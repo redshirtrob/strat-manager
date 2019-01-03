@@ -115,7 +115,7 @@ def main(filename, stash_directory=None, league='blb'):
         with open(full_path, 'w') as f:
             json.dump(flat_ast, f, indent=2)
     else:
-        print json.dumps(flat_ast, indent=2)
+        print(json.dumps(flat_ast, indent=2))
         
 
 if __name__ == '__main__':

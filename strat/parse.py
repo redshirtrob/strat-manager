@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from GameReport import GameReportParser
-from grako.exceptions import FailedParse
-from grako.ast import AST
+from tatsu.exceptions import FailedToken
+from tatsu.ast import AST
 
 PITCHING_RESULTS = (
     'WIN', 'W',
@@ -34,7 +34,7 @@ class GameReportSemanticActions(object):
         nickname = self.find_nickname(phrase)
         if city is None or nickname is None:
             return None
-        return AST(city=unicode(city), nickname=unicode(nickname), year=year)
+        return AST(city=str(city), nickname=str(nickname), year=year)
 
     def validate_nickname(self, nickname):
         if nickname is None:
@@ -78,7 +78,7 @@ class GameReportSemanticActions(object):
         phrase = ast.phrase.lower()
         away, home = phrase.split(' at ')
 
-        return AST(home=unicode(home), away=unicode(away))
+        return AST(home=str(home), away=str(away))
 
     def boxscore_pitching_header_team(self, ast):
         self.validate_nickname(ast.nickname)
@@ -114,8 +114,8 @@ class GameReportSemanticActions(object):
         home_headers = headers(home_string, home_team)
 
         # Generate the AST
-        away_ast = AST(nickname=unicode(away_team), headers=[unicode(h) for h in away_headers])
-        home_ast = AST(nickname=unicode(home_team), headers=[unicode(h) for h in home_headers])
+        away_ast = AST(nickname=str(away_team), headers=[str(h) for h in away_headers])
+        home_ast = AST(nickname=str(home_team), headers=[str(h) for h in home_headers])
         return AST(away=away_ast, home=home_ast)
 
     # <font color="#000000">J.Lopez WIN(4-0) BS(1st)  1 1/3   1   0   0   1   0   0  24   2.96</font>
@@ -129,7 +129,7 @@ class GameReportSemanticActions(object):
         name_parts = ast.player_name.split()
         for pr in PITCHING_RESULTS:
             if pr in name_parts:
-                result_stats.append(unicode(pr))
+                result_stats.append(str(pr))
 
         # didn't find any results embedded in the `player_name`
         if len(result_stats) == 0:
@@ -177,14 +177,14 @@ def parse_league_daily(html, cities=None, nicknames=None):
     for table in tables:
         try:
             stories_ast[-1:-1] = parser.parse(table.prettify(), 'game_story_table')
-        except FailedParse:
+        except FailedToken:
             pass
 
     boxscores_ast = []
     for table in tables:
         try:
             boxscores_ast[-1:-1] = parser.parse(table.prettify(), 'boxscore_table')
-        except FailedParse as e:
+        except FailedToken:
             pass
 
     if len(stories_ast) == 0 or len(boxscores_ast) == 0:

@@ -21,7 +21,7 @@ font_close = '</font>' ;
 
 (* J.Bradley Jr *)
 short_name = ?/[A-Z]\.[A-Za-z\*\-\'\s]+/? ;
-short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (P|C|1B|1|2B|2|3B|3|SS|S|LF|L|CF|C|RF|R|PR|DH|D|PH))/? ;
+short_name_no_pos = ?/[A-Z]\.[A-Za-z\s\*\-\']+[A-Za-z](?= (1B|1|2B|2|3B|3|SS|S|LF|L|CF|C|RF|R|PR|DH|D|PH|P))/? ;
 short_name_no_result = ?/[A-Z]\.[A-Za-z\s\*\-\']+(?= (WIN|W|LOSS|L|HOLD|H|SAVE|S|BS|B|[0-9]))/? ;
 
 last_name = ?/[A-Za-z\-\'\s\*]+/? ;
@@ -34,9 +34,11 @@ full_name_no_of = ?/[A-Za-z\.\s\-\'\*]+(?= of)/? ;
 
 nickname_no_sep = ?/[A-Za-z0-9\'\s]+(?=(\:|\.|\s+AB|\s+IP|\())/? ;
 
+ws = ?/\s+/? ;
+
 phrase = ?/[A-Za-z0-9\'\s\.\/]*/? ;
 
-position = 'P' | 'C' | '1B' | '1' | '2B' | '2' | '3B' | '3' | 'SS' | 'S' | 'LF' | 'L' | 'CF' | 'C' | 'RF' | 'R' | 'PR' | 'DH' | 'D' | 'PH';
+position = '1B' | '1' | '2B' | '2' | '3B' | '3' | 'SS' | 'S' | 'LF' | 'L' | 'CF' | 'C' | 'RF' | 'R' | 'PR' | 'DH' | 'D' | 'PH' | 'P';
 parenthesized_position = '(' @:position ')';
 
 year = ?/[0-9]{4}/? ;
@@ -112,7 +114,11 @@ parenthesized_whole_ordinal = '(' @:whole_ordinal [')'] ;
 (* Box Score Rules *)
 boxscore_td_start = '<td valign="top">' ;
 boxscore_p_start = '<p class="bnorm">' ;
-boxscore_spacer = >font_white >font_close ;
+boxscore_spacer =
+    >font_white
+    /\s*/
+    >font_close
+    ;
 
 (* <td valign="top"> <pre> <p class="bnorm"> *)
 boxscore_header =
@@ -142,23 +148,20 @@ boxscore_hitting_header =
     >font_close
     ;
 
-boxscore_hitting_sub_annotation = ?/[A-Z]?/? ;
+boxscore_hitting_sub_annotation = /[A-Z]?/ ;
 boxscore_hitting_substitution =
     @:boxscore_hitting_sub_annotation
     '-'
     ;
 
 (* PR,DH *)
-boxscore_hitting_position =
-    @:position
-    [',']
-    ;
+boxscore_hitting_position = ','.{position} ;
 
 (* T.La Stella 2B      3  0  1  1 .229 *)
 boxscore_hitting_stat_line =
-    substitution:[boxscore_hitting_substitution]
+    substitution:{boxscore_hitting_substitution}
     player_name:short_name_no_pos
-    positions:{boxscore_hitting_position}
+    positions:boxscore_hitting_position
     statistics:{(decimal_number | not_a_number)}
     ;
 
@@ -175,7 +178,7 @@ dashes = ?/[\-]{2,3}/? ;
 (* <font color="#000000">                     -- -- -- ---                            -- -- -- ---      </font> *)
 boxscore_hitting_separator =
     >font_white
-    {dashes}
+    /[\-\s]*/
     >font_close
     ;
 
